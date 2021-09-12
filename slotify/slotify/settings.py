@@ -5,7 +5,10 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Initialise environment variables
-env = environ.Env()
+env = environ.Env(
+    # set casting, default value
+    DEBUG=(bool, False)
+)
 environ.Env.read_env()
 
 # Quick-start development settings - unsuitable for production
