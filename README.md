@@ -13,6 +13,7 @@ Home to the REST API server for Slotify.
  - Windows: `venv\Scripts\activate.bat`
  - Mac: `source ./venv/bin/activate` # Activating virtualenv
  - (Better) using VSCode, select the python interpreter within the `venv` folder and the above is done automatically
+ - Note: When the virtual environment is activated (when your prompt has (venv) preceding it), use pip instead of pip3, even if you are using Python 3. The virtual environment’s copy of the tool is always named pip, regardless of the Python version
 5. install dependencies
  - `pip install -r requirements.txt` # Installing dependencies
 6. retrieve `.env` file from google drive
@@ -28,7 +29,6 @@ Home to the REST API server for Slotify.
 - to add a new package, go to the root directory and
   - `pip install packageName` # venv should be active
   - `pip freeze > requirements.txt` # update requirements.txt
-  - NOTE: for Mac, you may need to specify `pip3` instead of `pip`
 
 # Running the development server
 Start the django development server by running the following in command-line (make sure that you are in the `slotify` directory with manage.py):
