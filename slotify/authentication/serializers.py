@@ -10,8 +10,8 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         email = attrs.get('email', '')
-        name = attrs.get('name', '')
-        password = attrs.get('name', '')
+        username = attrs.get('username', '')
+        password = attrs.get('password', '')
 
         # if not name.isalnum():
         #     raise serializers.ValidationError("Name should consist of alphanumeric characters only.")
