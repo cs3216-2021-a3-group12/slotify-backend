@@ -16,7 +16,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+import groups.api_views
+
+API_PREFIX = 'api/v1'
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('auth/', include('authentication.urls'))
+
+    path('auth/', include('authentication.urls')),
+
+    path(f'{API_PREFIX}/groups/', include('groups.urls')),
+
 ]
