@@ -1,15 +1,14 @@
 from django.shortcuts import render
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
-from rest_framework import generics,status
-from .serializers import RegisterSerializer
+from rest_framework import generics, serializers,status
+from .serializers import RegisterSerializer, LoginSerializer
 from rest_framework.response import Response
 from .models import User
 from .util import RegistrationUtil
+from .constants import MESSAGE, TOKEN
 
 import jwt
-
-TOKEN = "token"
 
 # Create your views here.
 class RegisterView(generics.GenericAPIView):
@@ -43,10 +42,21 @@ class VerifyEmailView(generics.GenericAPIView):
                 user.is_verified = True
                 user.save()
 
-            return Response({'message': "Successfully verified email."}, status=status.HTTP_200_OK)
+            return Response({MESSAGE: "Successfully verified email."}, status=status.HTTP_200_OK)
         except jwt.ExpiredSignatureError:
-            return Response({'message': "Verification link expired."}, status=status.HTTP_400_BAD_REQUEST)
-        except jwt.exceptions.DecodeError as e:
-            return Response({'message': "Invalid token."}, status=status.HTTP_400_BAD_REQUEST)
+            # TODO: provide an API to handle this case
+            return Response({MESSAGE: "Verification link expired."}, status=status.HTTP_400_BAD_REQUEST)
+        except jwt.exceptions.DecodeError:
+            return Response({MESSAGE: "Invalid token."}, status=status.HTTP_400_BAD_REQUEST)
         except:
-            return Response({"message": "Some error occurred. Please try again later"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({MESSAGE: "Some error occurred. Please try again later"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class LoginView(generics.GenericAPIView):
+    serializer_class = LoginSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception = True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)

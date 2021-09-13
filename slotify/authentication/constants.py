@@ -1,0 +1,8 @@
+ACCESS = "access"
+REFRESH = "refresh"
+MESSAGE = "message"
+TOKEN = "token"
+TOKENS = "tokens"
+USERNAME = "username"
+EMAIL = "email"
+PASSWORD = "password"
