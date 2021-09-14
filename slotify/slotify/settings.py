@@ -1,5 +1,6 @@
 import environ
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,9 +24,19 @@ ALLOWED_HOSTS = ['127.0.0.1', 'api.slotify.club']
 
 AUTH_USER_MODEL = 'authentication.User'
 
-AUTHENTICATION_BACKENDS = ( 
+AUTHENTICATION_BACKENDS = [ 
     'django.contrib.auth.backends.ModelBackend', 
-)
+]
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=14) if DEBUG else timedelta(minutes=10),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=14),
+
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+}
+
+HTTP_PROTOCOL = env('HTTP_PROTOCOL') if DEBUG else 'https'
 
 # Application definition
 
@@ -88,6 +99,12 @@ DATABASES = {
     }
 }
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -127,9 +144,16 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+
 import os
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
