@@ -6,7 +6,7 @@ from .serializers import RegisterSerializer, LoginSerializer
 from rest_framework.response import Response
 from .models import User
 from .util import RegistrationUtil
-from .constants import MESSAGE, TOKEN
+from common.constants import MESSAGE, TOKEN
 
 import jwt
 

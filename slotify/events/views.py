@@ -5,8 +5,11 @@ from rest_framework import status
 
 from authentication.models import User
 from groups.models import Group
+from .models import Event
+from .methods import create_event, event_to_json
 from authentication.middleware import check_requester_is_authenticated
 from groups.middleware import check_group_exists, check_requester_is_group_admin
+from common.parsers import parse_epoch_timestamp_to_datetime
 
 from .serializers import PostEventSerializer
 
@@ -18,4 +21,27 @@ class GroupEventsView(APIView):
     def post(self, request, requester: User, group: Group):
         serializer = PostEventSerializer(data=request.data)
 
-        return Response({"username": requester.username, "group": group.name, "category": group.category.name}, status=status.HTTP_201_CREATED)
+        serializer.is_valid(raise_exception=True)
+        validated_data = serializer.validated_data
+
+        # Create but don't save event first
+        start_date_time = validated_data.get('start_date_time')
+        end_date_time = validated_data.get('end_date_time')
+
+        new_event = Event(
+            title=validated_data.get('title', ''),
+            description=validated_data.get('description', ''),
+            group=group,
+            start_date_time=parse_epoch_timestamp_to_datetime(start_date_time),
+            end_date_time=parse_epoch_timestamp_to_datetime(end_date_time),
+            location=validated_data.get('location', ''),
+            is_public=validated_data.get('is_public')
+        )
+
+        print(new_event)
+
+        new_event.save()
+
+        # TODO: create the associated slots
+
+        return Response(event_to_json(new_event), status=status.HTTP_201_CREATED)

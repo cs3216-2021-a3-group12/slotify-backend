@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import (
     AbstractBaseUser, BaseUserManager, PermissionsMixin)
 from rest_framework_simplejwt.tokens import RefreshToken
-from .constants import ACCESS, REFRESH, USERNAME, EMAIL
+from common.constants import ACCESS, REFRESH, USERNAME, EMAIL
 
 class UserManager(BaseUserManager):
     def create_user(self, username, email, password=None):

@@ -2,7 +2,7 @@ from django.contrib import auth
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 from .models import User
-from .constants import MESSAGE, USERNAME, EMAIL, PASSWORD, REFRESH, ACCESS, TOKENS
+from common.constants import MESSAGE, USERNAME, EMAIL, PASSWORD, REFRESH, ACCESS, TOKENS
 
 class RegisterSerializer(serializers.ModelSerializer):
     password=serializers.CharField(max_length=50, min_length=8, write_only=True)
