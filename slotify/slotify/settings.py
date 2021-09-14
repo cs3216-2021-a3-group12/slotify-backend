@@ -36,6 +36,7 @@ SIMPLE_JWT = {
     'SIGNING_KEY': SECRET_KEY,
 }
 
+HTTP_PROTOCOL = env('HTTP_PROTOCOL') if DEBUG else 'https'
 
 # Application definition
 

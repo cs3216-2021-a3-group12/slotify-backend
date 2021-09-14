@@ -2,6 +2,7 @@ from django.urls import reverse
 from django.core.mail import EmailMessage
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import User
+from django.conf import settings
 
 class RegistrationUtil:
     @staticmethod
@@ -9,8 +10,7 @@ class RegistrationUtil:
         access_token = RefreshToken.for_user(user).access_token    
         relative_link = reverse('verify-email')
 
-        # TODO: replace with https eventually
-        verification_link = f"http://{domain}{relative_link}?token={str(access_token)}"
+        verification_link = f"{settings.HTTP_PROTOCOL}://{domain}{relative_link}?token={str(access_token)}"
 
         username = user.username
 
