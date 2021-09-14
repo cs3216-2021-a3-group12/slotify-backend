@@ -2,15 +2,17 @@ from django.db import models
 from groups.models import Group
 from django.db.models import F, Q
 
+from .constants import EVENT_MAX_TITLE_LENGTH, EVENT_MAX_LOCATION_LENGTH
+
 # Create your models here.
 
 class Event(models.Model):
-    title = models.CharField(max_length=100)
-    description = models.CharField(max_length=1000)
+    title = models.CharField(max_length=EVENT_MAX_TITLE_LENGTH)
+    description = models.TextField()
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     start_date_time = models.DateTimeField()
     end_date_time = models.DateTimeField()
-    location = models.CharField(max_length=500)
+    location = models.CharField(max_length=EVENT_MAX_LOCATION_LENGTH)
     isPublic = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

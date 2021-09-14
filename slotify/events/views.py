@@ -5,12 +5,18 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from authentication.models import User
+from groups.models import Group
 from authentication.middleware import check_requester_is_authenticated
+from groups.middleware import check_group_exists
 
+from .serializers import PostEventSerializer
 
 # Create your views here.
-class EventsView(APIView):
+class GroupEventsView(APIView):
     @check_requester_is_authenticated()
+    @check_group_exists
     # TODO: make sure that user is group admin
-    def post(self, request, requester: User):
-        return Response({"username": requester.username}, status=status.HTTP_201_CREATED)
+    def post(self, request, requester: User, group: Group):
+        serializer = PostEventSerializer(data=request.data)
+
+        return Response({"username": requester.username, "group": group.name, "category": group.category.name}, status=status.HTTP_201_CREATED)
