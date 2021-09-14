@@ -16,10 +16,6 @@ urlpatterns = [
     path('categories/', groups.api_views.CategoryList.as_view()),
     path('categories/new', groups.api_views.CategoryCreate.as_view()),
     path('categories/<int:id>/', groups.api_views.CategoryRetrieveUpdateDestroy.as_view()),
-
-    path('memberships/', groups.api_views.MembershipList.as_view()),
-    path('memberships/new', groups.api_views.MembershipCreate.as_view()),
-    path('memberships/<int:id>/', groups.api_views.MembershipRetrieveUpdateDestroy.as_view()),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
