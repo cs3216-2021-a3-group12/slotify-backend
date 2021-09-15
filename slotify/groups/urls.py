@@ -2,6 +2,7 @@ from django.urls import path
 from rest_framework.urlpatterns import format_suffix_patterns
 
 import groups.api_views
+from events.views import GroupEventsView
 
 urlpatterns = [
     path("", groups.api_views.GroupList.as_view()),
@@ -22,6 +23,7 @@ urlpatterns = [
         "memberships/<int:id>/",
         groups.api_views.MembershipRetrieveUpdateDestroy.as_view(),
     ),
+    path('<int:group_id>/events/', GroupEventsView.as_view(), name="group_events"),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
