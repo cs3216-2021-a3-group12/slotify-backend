@@ -2,6 +2,10 @@ from authentication.middleware import check_requester_is_authenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.pagination import LimitOffsetPagination
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter
 
 from authentication.models import User
 from groups.models import Group
@@ -11,7 +15,11 @@ from authentication.middleware import check_requester_is_authenticated
 from groups.middleware import check_group_exists, check_requester_is_group_admin
 from common.parsers import parse_epoch_timestamp_to_datetime
 
-from .serializers import PostEventSerializer
+from .serializers import PostEventSerializer, EventSerializer
+
+class EventPagination(LimitOffsetPagination):
+    default_limit = 10
+    max_limit = 100
 
 # Create your views here.
 class GroupEventsView(APIView):
@@ -45,3 +53,17 @@ class GroupEventsView(APIView):
         # TODO: create the associated slots
 
         return Response(event_to_json(new_event), status=status.HTTP_201_CREATED)
+
+class EventListView(ListAPIView):
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
+    pagination_class = EventPagination
+    filter_backends = (DjangoFilterBackend, SearchFilter)
+    filter_fields = ('group','is_public')
+    search_fields = ('title', 'description')
+
+
+class EventRetrieveUpdateDestroy(RetrieveUpdateDestroyAPIView):
+    lookup_field = 'id'
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
