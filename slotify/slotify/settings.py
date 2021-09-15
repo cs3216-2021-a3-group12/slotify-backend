@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'authentication',
     'groups',
     'admin_honeypot',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
