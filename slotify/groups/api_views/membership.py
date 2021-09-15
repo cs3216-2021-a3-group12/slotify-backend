@@ -1,3 +1,4 @@
+from groups.methods import get_memberships
 from rest_framework.generics import (
     ListAPIView,
     CreateAPIView,
@@ -6,9 +7,18 @@ from rest_framework.generics import (
 from rest_framework.pagination import LimitOffsetPagination
 from django_filters.rest_framework import DjangoFilterBackend
 
-from groups.serializers import UserSerializer, MembershipSerializer
-from groups.models import Membership
+from groups.serializers import (
+    UserSerializer,
+    MembershipSerializer,
+    MembershipRequestSerializer,
+    MembershipUpdateSerializer,
+)
+from groups.models import Membership, Group
 from authentication.models import User
+from rest_framework.permissions import (
+    BasePermission,
+    IsAuthenticated,
+)
 
 
 class MembershipPagination(LimitOffsetPagination):
@@ -23,25 +33,50 @@ class MembersList(ListAPIView):
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ("group",)
 
-    # override filter queryset
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        group_id = self.request.query_params.get("group", None)
-        if group_id is not None:
-            queryset = queryset.filter(group=group_id).order_by("group")
-        return queryset
+
+class GroupListPermission(BasePermission):
+    def has_permission(self, request, view):
+        group = Group.objects.get(id=view.kwargs["id"])
+
+        try:
+            membership = get_memberships(group=group, user=request.user).get()
+            print(membership)
+            return membership.is_approved and membership.is_admin
+        except (Membership.DoesNotExist):
+            return False
 
 
 class MembershipList(ListAPIView):
     queryset = Membership.objects.all()
     serializer_class = MembershipSerializer
+    permission_classes = [IsAuthenticated & GroupListPermission]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        group_id = self.kwargs["id"]
+        if group_id is not None:
+            queryset = queryset.filter(group=group_id).order_by("group")
+        return queryset
 
 
-class MembershipCreate(CreateAPIView):
-    serializer_class = MembershipSerializer
+class MembershipRequest(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = MembershipRequestSerializer
+
+
+class GroupAdminPermission(BasePermission):
+    def has_permission(self, request, view):
+        group = view.get_object().group
+        try:
+            membership = get_memberships(group=group, user=request.user).get()
+            print(membership)
+            return membership.is_approved and membership.is_admin
+        except (Membership.DoesNotExist):
+            return False
 
 
 class MembershipRetrieveUpdateDestroy(RetrieveUpdateDestroyAPIView):
     lookup_field = "id"
     queryset = Membership.objects.all()
-    serializer_class = MembershipSerializer
+    serializer_class = MembershipUpdateSerializer
+    permission_classes = [IsAuthenticated & GroupAdminPermission]
