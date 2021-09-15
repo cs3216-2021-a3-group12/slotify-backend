@@ -2,7 +2,7 @@ from authentication.middleware import check_requester_is_authenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.pagination import LimitOffsetPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
@@ -61,3 +61,9 @@ class EventListView(ListAPIView):
     filter_backends = (DjangoFilterBackend, SearchFilter)
     filter_fields = ('group','is_public')
     search_fields = ('title', 'description')
+
+
+class EventRetrieveUpdateDestroy(RetrieveUpdateDestroyAPIView):
+    lookup_field = 'id'
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer

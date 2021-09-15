@@ -24,5 +24,6 @@ def api_root(request, format=None):
             "membership details": reverse("memberships-detail", request=request, format=format, args="1"),
             "list of events": reverse("events-list", request=request, format=format),
             "create new event": reverse("group-events", request=request, format=format, args="1"),
+            "event details": reverse("events-detail", request=request, format=format, args="1"),
         }
     )
