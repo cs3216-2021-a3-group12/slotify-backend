@@ -23,9 +23,11 @@ from rest_framework.permissions import (
 )
 from .serializers import PostEventSerializer, EventSerializer
 
+
 class EventPagination(LimitOffsetPagination):
     default_limit = 10
     max_limit = 100
+
 
 # Create your views here.
 class GroupEventsView(APIView):
@@ -39,44 +41,46 @@ class GroupEventsView(APIView):
         validated_data = serializer.validated_data
 
         # Create but don't save event first
-        start_date_time = validated_data.get('start_date_time')
-        end_date_time = validated_data.get('end_date_time')
+        start_date_time = validated_data.get("start_date_time")
+        end_date_time = validated_data.get("end_date_time")
 
         new_event = Event(
-            title=validated_data.get('title', ''),
-            description=validated_data.get('description', ''),
+            title=validated_data.get("title", ""),
+            description=validated_data.get("description", ""),
             group=group,
             start_date_time=parse_epoch_timestamp_to_datetime(start_date_time),
             end_date_time=parse_epoch_timestamp_to_datetime(end_date_time),
-            location=validated_data.get('location', ''),
-            is_public=validated_data.get('is_public')
+            location=validated_data.get("location", ""),
+            is_public=validated_data.get("is_public"),
         )
 
         print(new_event)
 
         new_event.save()
 
-        slots = validated_data.get('slots')
+        slots = validated_data.get("slots")
         for tag_name, limit in slots.items():
             new_slot = Slot(
-                event=new_event,
-                limit=limit,
-                tag=Tag.objects.get(name=tag_name)
+                event=new_event, limit=limit, tag=Tag.objects.get(name=tag_name)
             )
             new_slot.save()
 
         return Response(event_to_json(new_event), status=status.HTTP_201_CREATED)
+
 
 class EventListView(ListAPIView):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
     pagination_class = EventPagination
     filter_backends = (DjangoFilterBackend, SearchFilter)
-    filter_fields = ('id','group','is_public')
-    search_fields = ('title', 'description')
+    filter_fields = ("id", "group", "is_public")
+    search_fields = ("title", "description")
+
 
 class EventGroupAdminPermission(BasePermission):
     def has_permission(self, request, view):
+        if request.method is "GET":
+            return True
         group = view.get_object().group
         try:
             membership = get_memberships(group=group, user=request.user).get()
@@ -84,16 +88,9 @@ class EventGroupAdminPermission(BasePermission):
         except (Membership.DoesNotExist):
             return False
 
-class EventRetrieveView(RetrieveModelMixin, APIView):
-    queryset = Event.objects.all()
-    serializer_class = EventSerializer
 
-    def get(self, request, pk):
-        event = self.get_object()
-        return Response(event_to_json(event))
 class EventRetrieveUpdateDestroy(RetrieveUpdateDestroyAPIView):
-    lookup_field = 'id'
+    lookup_field = "id"
     queryset = Event.objects.all()
     serializer_class = EventSerializer
     permission_classes = [IsAuthenticated & EventGroupAdminPermission]
-

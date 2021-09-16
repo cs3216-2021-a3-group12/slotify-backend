@@ -43,6 +43,8 @@ class GroupCreate(CreateAPIView):
 
 class GroupAdminPermission(BasePermission):
     def has_permission(self, request, view):
+        if request.method == "GET":
+            return True
         group = view.get_object()
         try:
             membership = get_memberships(group=group, user=request.user).get()
