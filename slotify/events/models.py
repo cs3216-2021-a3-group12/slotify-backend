@@ -1,3 +1,4 @@
+from groups.models import Tag
 from django.db import models
 from groups.models import Group
 from django.db.models import F, Q
@@ -28,3 +29,11 @@ class Event(models.Model):
 
     def __str__(self):
         return f"{self.group} | {self.title} | {self.start_date_time} - {self.end_date_time}"
+
+class Slot(models.Model):
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+    limit = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.event}"
