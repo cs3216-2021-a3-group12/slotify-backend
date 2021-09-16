@@ -1,7 +1,10 @@
-from groups.models import Tag
 from django.db import models
-from groups.models import Group
 from django.db.models import F, Q
+from django.db.models import UniqueConstraint
+
+
+from groups.models import Group, Tag
+from authentication.models import User
 
 from common.constants import EVENT_MAX_TITLE_LENGTH, EVENT_MAX_LOCATION_LENGTH
 
@@ -37,3 +40,19 @@ class Slot(models.Model):
 
     def __str__(self):
         return f"{self.event}"
+
+
+class SignUp(models.Model):
+    slot = models.ForeignKey(Slot, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    is_confirmed = models.BooleanField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=['slot', 'user'], name='unique_signup')
+        ]
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"{user.username} | slot_id {slot.id}"
