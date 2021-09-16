@@ -26,15 +26,29 @@ class MembershipSerializer(serializers.ModelSerializer):
     class Meta:
         model = Membership
         fields = (
-            "id",
             "user",
             "group",
-            "date_joined",
             "is_approved",
             "is_admin",
             "tag",
         )
 
+class MembershipUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Membership
+        fields = (
+            "is_approved",
+            "is_admin",
+            "tag",
+        )
+
+class MembershipRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Membership
+        fields = (
+            "user",
+            "group",
+        )
 
 class GroupSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)

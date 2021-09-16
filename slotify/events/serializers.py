@@ -1,6 +1,7 @@
+from common.parsers import parse_epoch_timestamp_to_datetime
 from rest_framework import serializers
 
-from .models import Event
+from .models import Event, Slot
 from common.constants import (
     EVENT_MAX_TITLE_LENGTH,
     EVENT_MIN_TITLE_LENGTH,
@@ -14,7 +15,8 @@ class PostEventSerializer(serializers.ModelSerializer):
     end_date_time = serializers.IntegerField(min_value=0)
     location = serializers.CharField(max_length=EVENT_MAX_LOCATION_LENGTH)
     is_public = serializers.BooleanField()
-
+    slots = serializers.DictField(child=serializers.IntegerField(min_value=1))
+    
     def validate(self, data):
         """
         Check that start_date_time is before end_date_time.
@@ -28,9 +30,15 @@ class PostEventSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Event
-        fields = ["title", "description", "start_date_time", "end_date_time", "location", "is_public"]
+        fields = ["title", "description", "start_date_time", "end_date_time", "location", "is_public", "slots"]
 
-class EventSerializer(serializers.ModelSerializer):
+class SlotSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the event slots.
+    """
     class Meta:
+        model = Slot
+        fields = ["user", "event"]
+class EventSerializer(serializers.ModelSerializer):
         model = Event
         fields = ["id", "title", "description", "start_date_time", "end_date_time", "location", "is_public"]

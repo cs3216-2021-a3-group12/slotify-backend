@@ -34,13 +34,13 @@ urlpatterns = [
     ),
     path("members/", groups.api_views.MembersList.as_view(), name="members-list"),
     path(
-        "memberships/",
+        "<int:id>/memberships/",
         groups.api_views.MembershipList.as_view(),
         name="memberships-list",
     ),
     path(
         "memberships/new",
-        groups.api_views.MembershipCreate.as_view(),
+        groups.api_views.MembershipRequest.as_view(),
         name="memberships-create",
     ),
     path(
