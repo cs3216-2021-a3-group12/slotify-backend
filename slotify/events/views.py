@@ -13,7 +13,7 @@ from rest_framework.filters import SearchFilter
 from authentication.models import User
 from groups.models import Group
 from .models import Event, Slot, Tag
-from .methods import create_event, event_to_json
+from .methods import event_to_json
 from authentication.middleware import check_requester_is_authenticated
 from groups.middleware import check_group_exists, check_requester_is_group_admin
 from common.parsers import parse_epoch_timestamp_to_datetime
@@ -54,12 +54,13 @@ class GroupEventsView(APIView):
             is_public=validated_data.get("is_public"),
         )
 
-        print(new_event)
-
         new_event.save()
 
         slots = validated_data.get("slots")
         for tag_name, limit in slots.items():
+            # TODO: might need to handle case where tag name is invalid (doesn't exist)
+            # Alternatively, we can assume this case will not happen if frontend strictly
+            # uses tag names fetched
             new_slot = Slot(
                 event=new_event, limit=limit, tag=Tag.objects.get(name=tag_name)
             )
