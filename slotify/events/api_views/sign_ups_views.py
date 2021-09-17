@@ -11,7 +11,6 @@ from events.methods import (
     signup_to_json, get_existing_signup_for_any_event_slot, get_signups, get_existing_signup_for_slot
 )
 from events.models import SignUp
-from groups.models import Membership
 from groups.methods import get_user_group_membership
 
 from common.constants import MESSAGE, SIGNUP
@@ -57,9 +56,9 @@ class PostDeleteSignUpView(APIView):
         existing_signup = get_existing_signup_for_any_event_slot(event=slot.event, user=requester)
         if existing_signup:
             data = {
-                    MESSAGE: "Already signed up for this event",
-                    SIGNUP: signup_to_json(existing_signup)
-                }
+                MESSAGE: "Already signed up for this event",
+                SIGNUP: signup_to_json(existing_signup, include_user=False)
+            }
 
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
@@ -88,7 +87,7 @@ class PostDeleteSignUpView(APIView):
         except IntegrityError:
             data = {
                 MESSAGE: "Already signed up for this event",
-                SIGNUP: signup_to_json(new_signup)
+                SIGNUP: signup_to_json(new_signup, include_user=False)
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         except:
@@ -99,7 +98,7 @@ class PostDeleteSignUpView(APIView):
 
         data = {
             MESSAGE: "Successfully signed up",
-            SIGNUP: signup_to_json(new_signup)
+            SIGNUP: signup_to_json(new_signup, include_user=False)
         }
         
         return Response(data, status=status.HTTP_201_CREATED)
@@ -135,4 +134,27 @@ class PostDeleteSignUpView(APIView):
         data = {
             MESSAGE: "Sign up for this slot withdrawn."
         }
+        return Response(data, status=status.HTTP_200_OK)
+
+
+class AdminSignUpsView(APIView):
+    @check_requester_is_authenticated
+    @check_event_exists
+    def get(self, request, requester, event):
+        # check if requester is admin of the group which is hosting event
+        membership = get_user_group_membership(user=requester, group=event.group)
+        if not membership or not membership.is_approved or not membership.is_admin:
+            raise PermissionDenied(
+                detail="Not group admin, no permission to view all signups",
+                code="not_group_admin"
+            )
+
+        event_slots = get_slots(event=event)
+
+        data = [
+            slot_to_json(
+                slot=slot, include_availability=True, include_signups=True
+            ) for slot in event_slots
+        ]
+
         return Response(data, status=status.HTTP_200_OK)
