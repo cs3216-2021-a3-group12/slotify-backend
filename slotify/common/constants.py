@@ -29,3 +29,22 @@ END_DATE_TIME = "end_date_time"
 LOCATION = "location"
 IS_PUBLIC = "is_public"
 
+# Tag
+TAG_NAME = "name"
+TAG_ID = "tag_id"
+
+TAG = "tag"
+
+# Signups and Slots
+EVENT = "event"
+SLOT = "slot"
+SIGNUP_DATE = "signup_date"
+IS_CONFIRMED = "is_confirmed"
+
+CONFIRMED_SIGNUP_COUNT = "confirmed_signup_count"
+AVAILABLE_SLOT_COUNT = "available_slot_count"
+PENDING_SIGNUP_COUNT = "pending_signup_count"
+
+SIGN_UP = "sign_up"
+
+GENERAL_GROUP_TAG_NAME = "GroupMember"
