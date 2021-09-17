@@ -8,5 +8,5 @@ urlpatterns = [
     path('<int:id>/', EventRetrieveUpdateDestroy.as_view(), name="events-detail"),
     path('<int:event_id>/slots', SlotsView.as_view(), name="event-slots-list"),
     path('slots/<int:slot_id>', SingleSlotView.as_view(), name="single-slot-view"),
-    path('slots/<int:slot_id>/signups', PostSignUpView.as_view(), name="single-slot-view")
+    path('slots/<int:slot_id>/signups', PostSignUpView.as_view(), name="single-slot-view"),
 ]

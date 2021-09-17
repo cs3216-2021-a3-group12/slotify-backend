@@ -6,12 +6,15 @@ from rest_framework import status
 from authentication.middleware import check_requester_is_authenticated
 from events.methods import get_slots
 from events.middleware import check_event_exists, check_slot_exists
-from events.methods import get_slot_availability_data, slot_to_json, get_signups, signup_to_json, is_general_group_slot
-from events.models import Slot, Event, SignUp
-from groups.models import Group, Tag, Membership
-from groups.methods import get_memberships
+from events.methods import (
+    slot_to_json, get_slot_availability_data, is_general_group_slot,
+    signup_to_json, get_existing_signup,
+)
+from events.models import SignUp
+from groups.models import Membership
+from groups.methods import get_user_group_membership
 
-from common.constants import MESSAGE, SIGN_UP
+from common.constants import MESSAGE, SIGNUP
 
 class SlotsView(APIView):
     @check_event_exists
@@ -21,16 +24,17 @@ class SlotsView(APIView):
         formatted_slots = []
 
         for slot in slots:
-            slot_data = slot_to_json(slot, include_availability=True)
+            slot_data = slot_to_json(slot)
             formatted_slots.append(slot_data)
 
         return Response(data=formatted_slots, status=status.HTTP_200_OK)
 
 class SingleSlotView(APIView):
+    @check_requester_is_authenticated
     @check_slot_exists
-    def get(self, request, slot):
+    def get(self, request, requester, slot):
         return Response(
-            data=slot_to_json(slot, include_availability=True), status=status.HTTP_200_OK
+            data=slot_to_json(slot, user=requester), status=status.HTTP_200_OK
         )
 
     # TODO: endpoints for updating slot
@@ -48,26 +52,21 @@ class PostSignUpView(APIView):
         group = event.group
         slot_tag = slot.tag
 
-         # Check if user already signed up for another slot
-        try:
-            existing_signup = get_signups(slot__event=event, user=requester).get()
-            if existing_signup:
-                data = {
+        # Check if user already signed up for another slot
+        existing_signup = get_existing_signup(slot=slot, user=requester)
+        if existing_signup:
+            data = {
                     MESSAGE: "Already signed up for this event",
-                    SIGN_UP: signup_to_json(existing_signup)
+                    SIGNUP: signup_to_json(existing_signup)
                 }
 
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
-        except SignUp.DoesNotExist:
-            pass
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
 
         # If this slot is exclusive to group members only, ensure requester is group member
         if slot_tag.is_exclusive_to_groups:
-            try:
-                membership = get_memberships(user=requester, group=group).get()
-                if not membership.is_approved:
-                    raise Membership.DoesNotExist
-            except Membership.DoesNotExist:
+            membership = get_user_group_membership(user=requester, group=group)
+            if membership is None or not membership.is_approved:
                 raise PermissionDenied(detail="Not group member", code="not_group_member")
                 
             # Check if this is a general slot (any group members can join this slot regardless of tag)
@@ -88,7 +87,7 @@ class PostSignUpView(APIView):
         except IntegrityError:
             data = {
                 MESSAGE: "Already signed up for this event",
-                SIGN_UP: signup_to_json(new_signup)
+                SIGNUP: signup_to_json(new_signup)
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         except:
@@ -99,7 +98,7 @@ class PostSignUpView(APIView):
 
         data = {
             MESSAGE: "Successfully signed up",
-            SIGN_UP: signup_to_json(new_signup)
+            SIGNUP: signup_to_json(new_signup)
         }
         
         return Response(data, status=status.HTTP_201_CREATED)

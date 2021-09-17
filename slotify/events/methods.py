@@ -1,10 +1,12 @@
+from django.urls.conf import include
 from .models import Event, Slot, SignUp
+from groups.methods import get_user_group_membership
 from common.parsers import parse_datetime_to_epoch_time
 # Constants
 from common.constants import (TITLE, DESCRIPTION, START_DATE_TIME, END_DATE_TIME, LOCATION, IS_PUBLIC)
 from common.constants import (TAG, TAG_NAME, TAG_ID)
-from common.constants import (SLOT, SLOT_ID, CONFIRMED_SIGNUP_COUNT, PENDING_SIGNUP_COUNT, AVAILABLE_SLOT_COUNT,
-SIGNUP_DATE, IS_CONFIRMED)
+from common.constants import (SLOT, SLOT_ID, SIGNUP_ID, CONFIRMED_SIGNUP_COUNT, PENDING_SIGNUP_COUNT, AVAILABLE_SLOT_COUNT,
+SIGNUP_DATE, IS_CONFIRMED, IS_ELIGIBLE, IS_SIGNED_UP)
 
 def get_events(*args, **kwargs):
     return Event.objects.filter(*args, **kwargs)
@@ -29,12 +31,14 @@ def event_to_json(event):
 
 def signup_to_json(signup):
     data = {
-        SLOT: slot_to_json(signup.slot),
+        SIGNUP_ID: signup.id,
+        SLOT: slot_to_json(signup.slot, include_availability=False),
         SIGNUP_DATE: parse_datetime_to_epoch_time(signup.created_at),
         IS_CONFIRMED: signup.is_confirmed
     }
 
     return data
+
 
 def get_slot_availability_data(slot):
     confirmed_signups = len(get_signups(slot=slot, is_confirmed=True))
@@ -43,7 +47,15 @@ def get_slot_availability_data(slot):
 
     return confirmed_signups, pending_signups, available_slots
 
-def slot_to_json(slot, include_availability=False):
+
+def get_existing_signup(slot, user):
+    try:
+        return get_signups(slot__event=slot.event, user=user).get()
+    except SignUp.DoesNotExist:
+        return None
+
+
+def slot_to_json(slot, include_availability=True, user=None):
     data = {
         TAG: { 
             TAG_NAME: slot.tag.name,
@@ -58,6 +70,29 @@ def slot_to_json(slot, include_availability=False):
         data[CONFIRMED_SIGNUP_COUNT] = confirmed
         data[PENDING_SIGNUP_COUNT] = pending
         data[AVAILABLE_SLOT_COUNT] = available
+
+    if not user:
+        return data
+
+    # Return user-specific data
+    existing_signup = get_existing_signup(slot=slot, user=user)
+    data[IS_SIGNED_UP] = existing_signup is not None
+    data[IS_CONFIRMED] = existing_signup is not None and existing_signup.is_confirmed
+
+    is_eligible = True
+
+    if slot.tag.is_exclusive_to_groups:
+        group = slot.event.group
+        membership = get_user_group_membership(user=user, group=group)
+        if membership is None or not membership.is_approved:
+            is_eligible = False
+        
+        # Check if this is a general slot (any group members can join this slot regardless of tag)
+        # If not general slot, check if member has a matching slot tag
+        if not is_general_group_slot(slot) and slot.tag != membership.tag:
+            is_eligible = False
+    
+    data[IS_ELIGIBLE] = is_eligible
 
     return data
 

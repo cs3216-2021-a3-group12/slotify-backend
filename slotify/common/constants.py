@@ -46,6 +46,12 @@ CONFIRMED_SIGNUP_COUNT = "confirmed_signup_count"
 AVAILABLE_SLOT_COUNT = "available_slot_count"
 PENDING_SIGNUP_COUNT = "pending_signup_count"
 
-SIGN_UP = "sign_up"
+SIGNUP = "signup"
+SIGNUP_ID = "signup_id"
 
+# Default name for tag for group
 GENERAL_GROUP_TAG_NAME = "GroupMember"
+PUBLIC_TAG_NAME = "Public"
+
+IS_ELIGIBLE = "is_eligible"
+IS_SIGNED_UP = "is_signed_up"
