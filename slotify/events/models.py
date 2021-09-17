@@ -47,6 +47,7 @@ class SignUp(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     is_confirmed = models.BooleanField()
     created_at = models.DateTimeField(auto_now_add=True)
+    has_attended = models.BooleanField(default=False)
 
     class Meta:
         constraints = [

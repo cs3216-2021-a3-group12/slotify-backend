@@ -1,7 +1,7 @@
 from rest_framework.exceptions import NotFound
 
-from .models import Event, Slot
-from .methods import get_events, get_slots
+from .models import Event, Slot, SignUp
+from .methods import get_events, get_slots, get_signups
 
 def check_event_exists(view_method):
     def _arguments_wrapper(instance, request, event_id, *args, **kwargs):
@@ -33,5 +33,24 @@ def check_slot_exists(view_method):
             )
 
         return view_method(instance, request, slot=slot, *args, **kwargs)
+
+    return _arguments_wrapper
+
+
+def check_signup_exists(view_method):
+    def _arguments_wrapper(instance, request, signup_id, *args, **kwargs):
+        try:
+            signup = (
+                get_signups(id=signup_id)
+                .select_related("user", "slot")
+                .get()
+            )
+        except SignUp.DoesNotExist:
+            raise NotFound(
+                detail="No signup found.",
+                code="no_signup_found",
+            )
+
+        return view_method(instance, request, signup=signup, *args, **kwargs)
 
     return _arguments_wrapper

@@ -32,10 +32,13 @@ IS_PUBLIC = "is_public"
 # Tag
 TAG_NAME = "tag_name"
 TAG_ID = "tag_id"
-
 TAG = "tag"
 
-# Signups and Slots
+# Default name for tags
+GENERAL_GROUP_TAG_NAME = "GroupMember"
+PUBLIC_TAG_NAME = "Public"
+
+# Slots
 EVENT = "event"
 SLOT = "slot"
 SLOT_ID = "slot_id"
@@ -49,15 +52,12 @@ PENDING_SIGNUP_COUNT = "pending_signup_count"
 CONFIRMED_SIGNUPS = "confirmed_signups"
 PENDING_SIGNUPS = "pending_signups"
 
-SIGNUP = "signup"
-SIGNUPS = "signups"
-SIGNUP_ID = "signup_id"
-
-# Default name for tag for group
-GENERAL_GROUP_TAG_NAME = "GroupMember"
-PUBLIC_TAG_NAME = "Public"
-
 IS_ELIGIBLE = "is_eligible"
 IS_SIGNED_UP = "is_signed_up"
 
+# SignUps
+SIGNUP = "signup"
+SIGNUPS = "signups"
+SIGNUP_ID = "signup_id"
+HAS_ATTENDED = "has_attended"
 USER = "user"

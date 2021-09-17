@@ -5,15 +5,16 @@ from rest_framework.response import Response
 from rest_framework import status
 from authentication.middleware import check_requester_is_authenticated
 from events.methods import get_slots
-from events.middleware import check_event_exists, check_slot_exists
+from events.middleware import check_event_exists, check_slot_exists, check_signup_exists
 from events.methods import (
     slot_to_json, get_slot_availability_data, is_general_group_slot,
     signup_to_json, get_existing_signup_for_any_event_slot, get_signups, get_existing_signup_for_slot
 )
 from events.models import SignUp
 from groups.methods import get_user_group_membership
+from events.serializers import UpdateSignUpSerializer
 
-from common.constants import MESSAGE, SIGNUP
+from common.constants import MESSAGE, SIGNUP, HAS_ATTENDED
 
 class SlotsView(APIView):
     @check_requester_is_authenticated
@@ -137,7 +138,7 @@ class PostDeleteSignUpView(APIView):
         return Response(data, status=status.HTTP_200_OK)
 
 
-class AdminSignUpsView(APIView):
+class AdminGetSignUpsView(APIView):
     @check_requester_is_authenticated
     @check_event_exists
     def get(self, request, requester, event):
@@ -158,3 +159,30 @@ class AdminSignUpsView(APIView):
         ]
 
         return Response(data, status=status.HTTP_200_OK)
+
+
+class AdminUpdateSignUpsView(APIView):
+    @check_requester_is_authenticated
+    @check_signup_exists
+    def put(self, request, requester, signup):
+        group = signup.slot.event.group
+        # check if requester is admin of the group which is hosting event
+        membership = get_user_group_membership(user=requester, group=group)
+        if not membership or not membership.is_approved or not membership.is_admin:
+            raise PermissionDenied(
+                detail="Not group admin, no permission to view all signups",
+                code="not_group_admin"
+            )
+
+        serializer = UpdateSignUpSerializer(data=request.data)
+
+        serializer.is_valid(raise_exception=True)
+        validated_data = serializer.validated_data
+
+        has_attended = validated_data.get(HAS_ATTENDED)
+
+        signup.has_attended = has_attended
+        signup.save()
+
+        # updated signup
+        return Response(signup_to_json(signup), status=status.HTTP_200_OK)

@@ -1,7 +1,7 @@
 from common.parsers import parse_epoch_timestamp_to_datetime
 from rest_framework import serializers
 
-from .models import Event, Slot
+from .models import Event, Slot, SignUp
 from common.constants import (
     EVENT_MAX_TITLE_LENGTH,
     EVENT_MIN_TITLE_LENGTH,
@@ -39,6 +39,15 @@ class SlotSerializer(serializers.ModelSerializer):
     class Meta:
         model = Slot
         fields = ["user", "event"]
+
 class EventSerializer(serializers.ModelSerializer):
+    class Meta:
         model = Event
         fields = ["id", "title", "description", "start_date_time", "end_date_time", "location", "is_public"]
+
+class UpdateSignUpSerializer(serializers.ModelSerializer):
+    has_attended = serializers.BooleanField()
+
+    class Meta:
+        model = SignUp
+        fields = ["has_attended"]
