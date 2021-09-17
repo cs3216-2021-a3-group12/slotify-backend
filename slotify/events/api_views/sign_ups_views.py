@@ -8,7 +8,7 @@ from events.methods import get_slots
 from events.middleware import check_event_exists, check_slot_exists
 from events.methods import (
     slot_to_json, get_slot_availability_data, is_general_group_slot,
-    signup_to_json, get_existing_signup,
+    signup_to_json, get_existing_signup_for_any_event_slot,
 )
 from events.models import SignUp
 from groups.models import Membership
@@ -17,14 +17,15 @@ from groups.methods import get_user_group_membership
 from common.constants import MESSAGE, SIGNUP
 
 class SlotsView(APIView):
+    @check_requester_is_authenticated
     @check_event_exists
-    def get(self, request, event):
+    def get(self, request, requester, event):
         slots = get_slots(event=event)
 
         formatted_slots = []
 
         for slot in slots:
-            slot_data = slot_to_json(slot)
+            slot_data = slot_to_json(slot, user=requester)
             formatted_slots.append(slot_data)
 
         return Response(data=formatted_slots, status=status.HTTP_200_OK)
@@ -53,7 +54,7 @@ class PostSignUpView(APIView):
         slot_tag = slot.tag
 
         # Check if user already signed up for another slot
-        existing_signup = get_existing_signup(slot=slot, user=requester)
+        existing_signup = get_existing_signup_for_any_event_slot(event=slot.event, user=requester)
         if existing_signup:
             data = {
                     MESSAGE: "Already signed up for this event",

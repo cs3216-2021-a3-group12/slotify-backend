@@ -48,9 +48,16 @@ def get_slot_availability_data(slot):
     return confirmed_signups, pending_signups, available_slots
 
 
-def get_existing_signup(slot, user):
+def get_existing_signup_for_slot(slot, user):
     try:
-        return get_signups(slot__event=slot.event, user=user).get()
+        return get_signups(slot=slot, user=user).get()
+    except SignUp.DoesNotExist:
+        return None
+
+
+def get_existing_signup_for_any_event_slot(event, user):
+    try:
+        return get_signups(slot__event=event, user=user).get()
     except SignUp.DoesNotExist:
         return None
 
@@ -74,8 +81,8 @@ def slot_to_json(slot, include_availability=True, user=None):
     if not user:
         return data
 
-    # Return user-specific data
-    existing_signup = get_existing_signup(slot=slot, user=user)
+    # Return user-specific data for the slot
+    existing_signup = get_existing_signup_for_slot(slot, user)
     data[IS_SIGNED_UP] = existing_signup is not None
     data[IS_CONFIRMED] = existing_signup is not None and existing_signup.is_confirmed
 
@@ -86,10 +93,11 @@ def slot_to_json(slot, include_availability=True, user=None):
         membership = get_user_group_membership(user=user, group=group)
         if membership is None or not membership.is_approved:
             is_eligible = False
+
         
         # Check if this is a general slot (any group members can join this slot regardless of tag)
         # If not general slot, check if member has a matching slot tag
-        if not is_general_group_slot(slot) and slot.tag != membership.tag:
+        if not is_general_group_slot(slot) and membership and slot.tag != membership.tag:
             is_eligible = False
     
     data[IS_ELIGIBLE] = is_eligible
