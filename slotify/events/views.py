@@ -1,4 +1,3 @@
-from rest_framework.mixins import RetrieveModelMixin
 from groups.models import Membership
 from groups.methods import get_memberships
 from authentication.middleware import check_requester_is_authenticated
@@ -9,9 +8,6 @@ from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.pagination import LimitOffsetPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
-
-from authentication.models import User
-from groups.models import Group
 from .models import Event, Slot, Tag
 from .methods import event_to_json
 from authentication.middleware import check_requester_is_authenticated
@@ -22,6 +18,8 @@ from rest_framework.permissions import (
     BasePermission,
 )
 from .serializers import PostEventSerializer, EventSerializer
+from events.methods import get_signups, signup_to_json, event_to_json
+from common.constants import EVENT, SIGNUP
 
 
 class EventPagination(LimitOffsetPagination):
@@ -34,7 +32,7 @@ class GroupEventsView(APIView):
     @check_requester_is_authenticated
     @check_group_exists
     @check_requester_is_group_admin
-    def post(self, request, requester: User, group: Group):
+    def post(self, request, requester, group):
         serializer = PostEventSerializer(data=request.data)
 
         serializer.is_valid(raise_exception=True)
@@ -67,6 +65,23 @@ class GroupEventsView(APIView):
             new_slot.save()
 
         return Response(event_to_json(new_event), status=status.HTTP_201_CREATED)
+
+
+class UserSignedUpEventsView(APIView):
+    @check_requester_is_authenticated
+    def get(self, request, requester):
+        all_events_data = []
+
+        all_signups = get_signups(user=requester).order_by("-created_at")
+        for signup in all_signups:
+            event = signup.slot.event
+            event_data = {
+                EVENT: event_to_json(event),
+                SIGNUP: signup_to_json(signup, include_user=False)
+            }
+            all_events_data.append(event_data)
+
+        return Response(all_events_data, status=status.HTTP_200_OK)
 
 
 class EventListView(ListAPIView):
