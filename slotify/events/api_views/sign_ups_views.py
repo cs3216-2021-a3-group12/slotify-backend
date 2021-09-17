@@ -1,3 +1,4 @@
+from django.db.utils import IntegrityError
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -50,13 +51,13 @@ class PostSignUpView(APIView):
          # Check if user already signed up for another slot
         try:
             existing_signup = get_signups(slot__event=event, user=requester).get()
-            if existing_signup and existing_signup.is_confirmed:
+            if existing_signup:
                 data = {
                     MESSAGE: "Already signed up for this event",
                     SIGN_UP: signup_to_json(existing_signup)
                 }
 
-                return Response(data, status.HTTP_400_BAD_REQUEST)
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
         except SignUp.DoesNotExist:
             pass
 
@@ -82,11 +83,23 @@ class PostSignUpView(APIView):
             user=requester,
             is_confirmed=current_signup_can_be_confirmed
         )
-        new_signup.save()
+        try:
+            new_signup.save()
+        except IntegrityError:
+            data = {
+                MESSAGE: "Already signed up for this event",
+                SIGN_UP: signup_to_json(new_signup)
+            }
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response(
+                {MESSAGE: "An error occurred, please try again later"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
         data = {
             MESSAGE: "Successfully signed up",
             SIGN_UP: signup_to_json(new_signup)
         }
         
-        return Response({MESSAGE: "Signed up", }, status.HTTP_201_CREATED)
+        return Response(data, status=status.HTTP_201_CREATED)

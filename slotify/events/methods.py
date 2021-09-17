@@ -1,8 +1,10 @@
 from .models import Event, Slot, SignUp
-from common.constants import (
-    TITLE, DESCRIPTION, START_DATE_TIME, END_DATE_TIME, LOCATION, IS_PUBLIC, EVENT, SLOT, TAG_NAME,
-    TAG_ID, CONFIRMED_SIGNUP_COUNT, PENDING_SIGNUP_COUNT, AVAILABLE_SLOT_COUNT, SIGNUP_DATE, IS_CONFIRMED)
 from common.parsers import parse_datetime_to_epoch_time
+# Constants
+from common.constants import (TITLE, DESCRIPTION, START_DATE_TIME, END_DATE_TIME, LOCATION, IS_PUBLIC)
+from common.constants import (TAG, TAG_NAME, TAG_ID)
+from common.constants import (SLOT, SLOT_ID, CONFIRMED_SIGNUP_COUNT, PENDING_SIGNUP_COUNT, AVAILABLE_SLOT_COUNT,
+SIGNUP_DATE, IS_CONFIRMED)
 
 def get_events(*args, **kwargs):
     return Event.objects.filter(*args, **kwargs)
@@ -22,10 +24,7 @@ def event_to_json(event):
         LOCATION: event.location,
         IS_PUBLIC: event.is_public,
         # TODO: include group to json here
-    }
-
-    # TODO: include info about slots if necessary (eg. how many signed up, how many slots left etc)
-    
+    }    
     return data
 
 def signup_to_json(signup):
@@ -46,8 +45,11 @@ def get_slot_availability_data(slot):
 
 def slot_to_json(slot, include_availability=False):
     data = {
-        TAG_NAME: slot.tag.name,
-        TAG_ID: slot.tag.id,
+        TAG: { 
+            TAG_NAME: slot.tag.name,
+            TAG_ID: slot.tag.id
+        },
+        SLOT_ID: slot.id
     }
 
     if include_availability:

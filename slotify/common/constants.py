@@ -30,7 +30,7 @@ LOCATION = "location"
 IS_PUBLIC = "is_public"
 
 # Tag
-TAG_NAME = "name"
+TAG_NAME = "tag_name"
 TAG_ID = "tag_id"
 
 TAG = "tag"
@@ -38,6 +38,7 @@ TAG = "tag"
 # Signups and Slots
 EVENT = "event"
 SLOT = "slot"
+SLOT_ID = "slot_id"
 SIGNUP_DATE = "signup_date"
 IS_CONFIRMED = "is_confirmed"
 
