@@ -6,7 +6,7 @@ from common.parsers import parse_datetime_to_epoch_time
 from common.constants import (TITLE, DESCRIPTION, START_DATE_TIME, END_DATE_TIME, LOCATION, IS_PUBLIC)
 from common.constants import (TAG, TAG_NAME, TAG_ID)
 from common.constants import (SLOT, SLOT_ID, SIGNUP_ID, CONFIRMED_SIGNUP_COUNT, PENDING_SIGNUP_COUNT, AVAILABLE_SLOT_COUNT,
-SIGNUP_DATE, IS_CONFIRMED, IS_ELIGIBLE, IS_SIGNED_UP)
+SIGNUP_DATE, IS_CONFIRMED, IS_ELIGIBLE, IS_SIGNED_UP, GENERAL_GROUP_TAG_NAME)
 
 def get_events(*args, **kwargs):
     return Event.objects.filter(*args, **kwargs)
@@ -105,4 +105,4 @@ def slot_to_json(slot, include_availability=True, user=None):
     return data
 
 def is_general_group_slot(slot):
-    return slot.tag.name == "GroupMember"
+    return slot.tag.name == GENERAL_GROUP_TAG_NAME

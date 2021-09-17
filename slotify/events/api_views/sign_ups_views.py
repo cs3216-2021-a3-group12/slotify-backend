@@ -8,7 +8,7 @@ from events.methods import get_slots
 from events.middleware import check_event_exists, check_slot_exists
 from events.methods import (
     slot_to_json, get_slot_availability_data, is_general_group_slot,
-    signup_to_json, get_existing_signup_for_any_event_slot,
+    signup_to_json, get_existing_signup_for_any_event_slot, get_signups, get_existing_signup_for_slot
 )
 from events.models import SignUp
 from groups.models import Membership
@@ -45,7 +45,7 @@ class SingleSlotView(APIView):
         pass
 
 
-class PostSignUpView(APIView):
+class PostDeleteSignUpView(APIView):
     @check_requester_is_authenticated
     @check_slot_exists
     def post(self, request, requester, slot):
@@ -103,3 +103,36 @@ class PostSignUpView(APIView):
         }
         
         return Response(data, status=status.HTTP_201_CREATED)
+
+    @check_requester_is_authenticated
+    @check_slot_exists
+    def delete(self, request, requester, slot):
+        existing_signup = get_existing_signup_for_slot(slot=slot, user=requester)
+
+        if not existing_signup:
+            data = {
+                MESSAGE: "No signup found",
+            }
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+        existing_signup.delete()
+
+        slot = existing_signup.slot
+
+        _, _, available = get_slot_availability_data(slot)
+        pending_signups = get_signups(slot=slot, is_confirmed=False).order_by("created_at")
+
+        for pending_signup in pending_signups:
+            if not available:
+                break
+
+            pending_signup.is_confirmed = True
+            pending_signup.save()
+            available -= 1
+
+            # TODO: send email/phone notification to previously waitlisted members
+
+        data = {
+            MESSAGE: "Sign up for this slot withdrawn."
+        }
+        return Response(data, status=status.HTTP_200_OK)

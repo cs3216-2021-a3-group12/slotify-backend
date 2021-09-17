@@ -55,4 +55,4 @@ class SignUp(models.Model):
         ordering = ["created_at"]
 
     def __str__(self):
-        return f"{user.username} | slot_id {slot.id}"
+        return f"{self.user.username} | slot_id {self.slot.id} | {self.created_at}"
