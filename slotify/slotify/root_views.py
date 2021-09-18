@@ -49,5 +49,7 @@ def api_root(request, format=None):
                 "events-detail", request=request, format=format, args="1"
             ),
             "messages": reverse("messages-list", request=request, format=format),
+            "create message": reverse("messages-create", request=request, format=format),
+            "message update read": reverse("messages-update", request=request, format=format, args="1"),
         }
     )
