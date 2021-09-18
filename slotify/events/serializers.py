@@ -40,5 +40,6 @@ class SlotSerializer(serializers.ModelSerializer):
         model = Slot
         fields = ["user", "event"]
 class EventSerializer(serializers.ModelSerializer):
+    class Meta:
         model = Event
         fields = ["id", "title", "description", "start_date_time", "end_date_time", "location", "is_public"]

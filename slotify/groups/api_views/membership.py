@@ -1,12 +1,10 @@
-from groups.methods import get_memberships
+from groups.methods import is_group_admin
+from groups.permissions import GroupAdminPermission
 from rest_framework.generics import (
     ListAPIView,
     CreateAPIView,
     RetrieveUpdateDestroyAPIView,
 )
-from rest_framework.pagination import LimitOffsetPagination
-from django_filters.rest_framework import DjangoFilterBackend
-
 from groups.serializers import (
     UserSerializer,
     MembershipSerializer,
@@ -21,29 +19,16 @@ from rest_framework.permissions import (
 )
 
 
-class MembershipPagination(LimitOffsetPagination):
-    default_limit = 10
-    max_limit = 100
-
-
 class MembersList(ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    pagination_class = MembershipPagination
-    filter_backends = (DjangoFilterBackend,)
     filter_fields = ("group",)
 
 
 class GroupListPermission(BasePermission):
     def has_permission(self, request, view):
         group = Group.objects.get(id=view.kwargs["id"])
-
-        try:
-            membership = get_memberships(group=group, user=request.user).get()
-            print(membership)
-            return membership.is_approved and membership.is_admin
-        except (Membership.DoesNotExist):
-            return False
+        return is_group_admin(request.user, group)
 
 
 class MembershipList(ListAPIView):
@@ -62,17 +47,6 @@ class MembershipList(ListAPIView):
 class MembershipRequest(CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = MembershipRequestSerializer
-
-
-class GroupAdminPermission(BasePermission):
-    def has_permission(self, request, view):
-        group = view.get_object().group
-        try:
-            membership = get_memberships(group=group, user=request.user).get()
-            print(membership)
-            return membership.is_approved and membership.is_admin
-        except (Membership.DoesNotExist):
-            return False
 
 
 class MembershipRetrieveUpdateDestroy(RetrieveUpdateDestroyAPIView):
