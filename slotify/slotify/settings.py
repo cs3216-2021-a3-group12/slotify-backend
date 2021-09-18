@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'admin_honeypot',
     'events',
     'django_filters',
+    'inboxes'
 ]
 
 MIDDLEWARE = [

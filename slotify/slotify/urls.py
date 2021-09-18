@@ -11,4 +11,5 @@ urlpatterns = [
     path("auth/", include("authentication.urls")),
     path(f"{API_PREFIX}/groups/", include("groups.urls")),
     path(f"{API_PREFIX}/events/", include("events.urls")),
+    path(f"{API_PREFIX}/messages/", include("inboxes.urls")),
 ]
