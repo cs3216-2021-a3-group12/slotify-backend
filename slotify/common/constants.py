@@ -12,14 +12,17 @@ EMAIL = "email"
 PASSWORD = "password"
 
 # Groups
-GROUP_NAME = "group_name"
+GROUP_NAME = "name"
+GROUP_ID = "id"
+GROUP_DESCRIPTION = "description"
 CATEGORY = "category"
+CATEGORY_NAME = "category_name"
+CATEGORY_ID = "category_id"
+BANNER_URL = "banner_url"
 
 # Events
 EVENT_MAX_TITLE_LENGTH = 100
 EVENT_MIN_TITLE_LENGTH = 3
-EVENT_MAX_DESCRIPTION_LENGTH = 1000
-
 EVENT_MAX_LOCATION_LENGTH = 500
 
 TITLE = "title"
@@ -28,6 +31,7 @@ START_DATE_TIME = "start_date_time"
 END_DATE_TIME = "end_date_time"
 LOCATION = "location"
 IS_PUBLIC = "is_public"
+GROUP = "group"
 
 # Tag
 TAG_NAME = "tag_name"

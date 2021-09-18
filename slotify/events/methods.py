@@ -1,10 +1,10 @@
 from django.urls.conf import include
 from .models import Event, Slot, SignUp
-from groups.methods import get_user_group_membership
+from groups.methods import get_user_group_membership, group_to_json
 from authentication.methods import user_to_json
 from common.parsers import parse_datetime_to_epoch_time
 # Constants
-from common.constants import (TITLE, DESCRIPTION, START_DATE_TIME, END_DATE_TIME, LOCATION, IS_PUBLIC)
+from common.constants import (TITLE, DESCRIPTION, START_DATE_TIME, END_DATE_TIME, LOCATION, IS_PUBLIC, GROUP)
 from common.constants import (TAG, TAG_NAME, TAG_ID)
 from common.constants import (SLOT, SLOT_ID, SIGNUP_ID, CONFIRMED_SIGNUP_COUNT, PENDING_SIGNUP_COUNT, 
 AVAILABLE_SLOT_COUNT, SIGNUP_DATE, IS_CONFIRMED, IS_ELIGIBLE, IS_SIGNED_UP, GENERAL_GROUP_TAG_NAME,
@@ -19,7 +19,7 @@ def get_slots(*args, **kwargs):
 def get_signups(*args, **kwargs):
     return SignUp.objects.filter(*args, **kwargs)
 
-def event_to_json(event):
+def event_to_json(event, include_group=True):
     data = {
         TITLE: event.title,
         DESCRIPTION: event.description,
@@ -27,8 +27,10 @@ def event_to_json(event):
         END_DATE_TIME: parse_datetime_to_epoch_time(event.end_date_time),
         LOCATION: event.location,
         IS_PUBLIC: event.is_public,
-        # TODO: include group to json here
-    }    
+    }
+    if include_group:
+        data[GROUP] = group_to_json(event.group)
+
     return data
 
 def signup_to_json(signup, include_slot=True, include_user=True):

@@ -6,7 +6,11 @@ from .methods import get_events, get_slots, get_signups
 def check_event_exists(view_method):
     def _arguments_wrapper(instance, request, event_id, *args, **kwargs):
         try:
-            event = get_events(id=event_id).get()
+            event = (
+                get_events(id=event_id)
+                .select_related("group")
+                .get()
+            )
         except Event.DoesNotExist:
             raise NotFound(
                 detail="No event found.",
