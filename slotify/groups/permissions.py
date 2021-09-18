@@ -9,3 +9,11 @@ class GroupAdminPermission(BasePermission):
             return True
         group = view.get_object()
         return is_group_admin(request.user, group)
+
+class EventGroupAdminPermission(BasePermission):
+    def has_permission(self, request, view):
+        if request.method == "GET":
+            return True
+        event = view.get_object()
+        group = event.group
+        return is_group_admin(request.user, group)

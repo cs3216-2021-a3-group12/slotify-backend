@@ -1,17 +1,10 @@
-from groups.models import Membership
-from groups.methods import get_memberships
-from groups.permissions import GroupAdminPermission
+from groups.permissions import EventGroupAdminPermission
 from authentication.middleware import check_requester_is_authenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView
-from rest_framework.pagination import LimitOffsetPagination
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import SearchFilter
 
-from authentication.models import User
-from groups.models import Group
 from .models import Event, Slot, Tag
 from .methods import event_to_json
 from authentication.middleware import check_requester_is_authenticated
@@ -20,7 +13,7 @@ from common.parsers import parse_epoch_timestamp_to_datetime
 from rest_framework.permissions import (
     IsAuthenticatedOrReadOnly,
 )
-from .serializers import PostEventSerializer, EventSerializer
+from .serializers import PostEventSerializer, EventSerializer, EventUpdateSerializer
 from events.methods import get_signups, signup_to_json, event_to_json
 from common.constants import EVENT, SIGNUP
 
@@ -74,7 +67,7 @@ class UserSignedUpEventsView(APIView):
             event = signup.slot.event
             event_data = {
                 EVENT: event_to_json(event),
-                SIGNUP: signup_to_json(signup, include_user=False)
+                SIGNUP: signup_to_json(signup, include_user=False),
             }
             all_events_data.append(event_data)
 
@@ -92,4 +85,20 @@ class EventRetrieveUpdateDestroy(RetrieveUpdateDestroyAPIView):
     lookup_field = "id"
     queryset = Event.objects.all()
     serializer_class = EventSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly & GroupAdminPermission]
+    permission_classes = [IsAuthenticatedOrReadOnly & EventGroupAdminPermission]
+
+    def get_serializer_class(self):
+        if self.request.method in ["PATCH", "POST"]:
+            return EventUpdateSerializer
+        return super().get_serializer_class()
+
+    def update(self, request, *args, **kwargs):
+        if request.data.get("start_date_time") is not None:
+            request.data["start_date_time"] = parse_epoch_timestamp_to_datetime(
+                request.data.get("start_date_time")
+            )
+        if request.data.get("end_date_time") is not None:
+            request.data["end_date_time"] = parse_epoch_timestamp_to_datetime(
+                request.data.get("end_date_time")
+            )
+        return super().update(request, *args, **kwargs)
