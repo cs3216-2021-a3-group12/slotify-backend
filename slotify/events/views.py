@@ -1,5 +1,6 @@
 from groups.models import Membership
 from groups.methods import get_memberships
+from groups.permissions import GroupAdminPermission
 from authentication.middleware import check_requester_is_authenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -8,26 +9,22 @@ from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.pagination import LimitOffsetPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
+
+from authentication.models import User
+from groups.models import Group
 from .models import Event, Slot, Tag
 from .methods import event_to_json
 from authentication.middleware import check_requester_is_authenticated
 from groups.middleware import check_group_exists, check_requester_is_group_admin
 from common.parsers import parse_epoch_timestamp_to_datetime
 from rest_framework.permissions import (
-    IsAuthenticated,
-    BasePermission,
+    IsAuthenticatedOrReadOnly,
 )
 from .serializers import PostEventSerializer, EventSerializer
 from events.methods import get_signups, signup_to_json, event_to_json
 from common.constants import EVENT, SIGNUP
 
 
-class EventPagination(LimitOffsetPagination):
-    default_limit = 10
-    max_limit = 100
-
-
-# Create your views here.
 class GroupEventsView(APIView):
     @check_requester_is_authenticated
     @check_group_exists
@@ -87,26 +84,12 @@ class UserSignedUpEventsView(APIView):
 class EventListView(ListAPIView):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
-    pagination_class = EventPagination
-    filter_backends = (DjangoFilterBackend, SearchFilter)
     filter_fields = ("id", "group", "is_public")
     search_fields = ("title", "description")
-
-
-class EventGroupAdminPermission(BasePermission):
-    def has_permission(self, request, view):
-        if request.method is "GET":
-            return True
-        group = view.get_object().group
-        try:
-            membership = get_memberships(group=group, user=request.user).get()
-            return membership.is_approved and membership.is_admin
-        except (Membership.DoesNotExist):
-            return False
 
 
 class EventRetrieveUpdateDestroy(RetrieveUpdateDestroyAPIView):
     lookup_field = "id"
     queryset = Event.objects.all()
     serializer_class = EventSerializer
-    permission_classes = [IsAuthenticated & EventGroupAdminPermission]
+    permission_classes = [IsAuthenticatedOrReadOnly & GroupAdminPermission]

@@ -58,6 +58,7 @@ class GroupSerializer(serializers.ModelSerializer):
         model = Group
         fields = ("id", "name", "description", "banner_url", "category", "members")
 
+    # TODO: remove if member info is not needed in the response
     def get_members(self, instance):
         records = Membership.objects.filter(group=instance).values_list(
             "user", flat=True

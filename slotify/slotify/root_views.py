@@ -48,5 +48,6 @@ def api_root(request, format=None):
             "event details": reverse(
                 "events-detail", request=request, format=format, args="1"
             ),
+            "messages": reverse("messages-list", request=request, format=format),
         }
     )
