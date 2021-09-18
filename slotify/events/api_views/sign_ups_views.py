@@ -5,16 +5,16 @@ from rest_framework.response import Response
 from rest_framework import status
 from authentication.middleware import check_requester_is_authenticated
 from events.methods import get_slots
-from events.middleware import check_event_exists, check_slot_exists
+from events.middleware import check_event_exists, check_slot_exists, check_signup_exists
 from events.methods import (
     slot_to_json, get_slot_availability_data, is_general_group_slot,
     signup_to_json, get_existing_signup_for_any_event_slot, get_signups, get_existing_signup_for_slot
 )
 from events.models import SignUp
-from groups.models import Membership
 from groups.methods import get_user_group_membership
+from events.serializers import UpdateSignUpSerializer
 
-from common.constants import MESSAGE, SIGNUP
+from common.constants import MESSAGE, SIGNUP, HAS_ATTENDED
 
 class SlotsView(APIView):
     @check_requester_is_authenticated
@@ -57,9 +57,9 @@ class PostDeleteSignUpView(APIView):
         existing_signup = get_existing_signup_for_any_event_slot(event=slot.event, user=requester)
         if existing_signup:
             data = {
-                    MESSAGE: "Already signed up for this event",
-                    SIGNUP: signup_to_json(existing_signup)
-                }
+                MESSAGE: "Already signed up for this event",
+                SIGNUP: signup_to_json(existing_signup, include_user=False)
+            }
 
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
@@ -88,7 +88,7 @@ class PostDeleteSignUpView(APIView):
         except IntegrityError:
             data = {
                 MESSAGE: "Already signed up for this event",
-                SIGNUP: signup_to_json(new_signup)
+                SIGNUP: signup_to_json(new_signup, include_user=False)
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         except:
@@ -99,7 +99,7 @@ class PostDeleteSignUpView(APIView):
 
         data = {
             MESSAGE: "Successfully signed up",
-            SIGNUP: signup_to_json(new_signup)
+            SIGNUP: signup_to_json(new_signup, include_user=False)
         }
         
         return Response(data, status=status.HTTP_201_CREATED)
@@ -136,3 +136,53 @@ class PostDeleteSignUpView(APIView):
             MESSAGE: "Sign up for this slot withdrawn."
         }
         return Response(data, status=status.HTTP_200_OK)
+
+
+class AdminGetSignUpsView(APIView):
+    @check_requester_is_authenticated
+    @check_event_exists
+    def get(self, request, requester, event):
+        # check if requester is admin of the group which is hosting event
+        membership = get_user_group_membership(user=requester, group=event.group)
+        if not membership or not membership.is_approved or not membership.is_admin:
+            raise PermissionDenied(
+                detail="Not group admin, no permission to view all signups",
+                code="not_group_admin"
+            )
+
+        event_slots = get_slots(event=event)
+
+        data = [
+            slot_to_json(
+                slot=slot, include_availability=True, include_signups=True
+            ) for slot in event_slots
+        ]
+
+        return Response(data, status=status.HTTP_200_OK)
+
+
+class AdminUpdateSignUpsView(APIView):
+    @check_requester_is_authenticated
+    @check_signup_exists
+    def put(self, request, requester, signup):
+        group = signup.slot.event.group
+        # check if requester is admin of the group which is hosting event
+        membership = get_user_group_membership(user=requester, group=group)
+        if not membership or not membership.is_approved or not membership.is_admin:
+            raise PermissionDenied(
+                detail="Not group admin, no permission to view all signups",
+                code="not_group_admin"
+            )
+
+        serializer = UpdateSignUpSerializer(data=request.data)
+
+        serializer.is_valid(raise_exception=True)
+        validated_data = serializer.validated_data
+
+        has_attended = validated_data.get(HAS_ATTENDED)
+
+        signup.has_attended = has_attended
+        signup.save()
+
+        # updated signup
+        return Response(signup_to_json(signup), status=status.HTTP_200_OK)
