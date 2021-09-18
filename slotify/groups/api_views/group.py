@@ -21,7 +21,7 @@ class GroupList(ListAPIView):
 
 class GroupCreate(CreateAPIView):
     serializer_class = GroupCreateSerializer
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         group = serializer.save()
