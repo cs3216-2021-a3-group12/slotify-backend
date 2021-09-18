@@ -24,10 +24,11 @@ class Group(models.Model):
     name = models.CharField(max_length=255, unique=True, db_index=True)
     description = models.TextField()
     date_created = models.DateTimeField(auto_now_add=True)
-    banner_url = models.CharField(
-        max_length=255,
+    banner_url = models.ImageField(
         blank=True,
-        default="https://images.pexels.com/photos/61135/pexels-photo-61135.jpeg",
+        null=True,
+        default = None,
+        upload_to = 'groups',
     )
     category = models.ForeignKey("Category", on_delete=models.CASCADE)
     members = models.ManyToManyField(User, through="Membership")
