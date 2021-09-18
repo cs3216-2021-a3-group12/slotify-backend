@@ -5,4 +5,4 @@ class MessageSerializer(serializers.ModelSerializer):
     created_at = serializers.ReadOnlyField()
     class Meta:
         model = Message
-        fields = ('id', 'text', 'user', 'is_read', 'created_at')
+        fields = ('id', 'title', 'content', 'read', 'created_at')

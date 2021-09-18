@@ -10,7 +10,7 @@ class MessageListView(ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Message.objects.filter(user=self.request.user)
+        return Message.objects.filter(receiver=self.request.user)
 
 class MessageUpdateView(UpdateAPIView):
     lookup_field = 'id'
@@ -19,4 +19,4 @@ class MessageUpdateView(UpdateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Message.objects.filter(user=self.request.user)
+        return Message.objects.filter(receiver=self.request.user)
