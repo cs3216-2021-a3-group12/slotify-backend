@@ -1,7 +1,7 @@
 from .models import User
 from django.db.models import QuerySet
 
-from common.constants import USERNAME, EMAIL
+from common.constants import USERNAME, EMAIL, TELEGRAM_HANDLE, STUDENT_NUMBER, NUSNET_ID
 
 def get_users(*args, **kwargs):
     return User.objects.filter(*args, **kwargs)
@@ -10,22 +10,21 @@ def get_users(*args, **kwargs):
 def user_to_json(user):
     data = {
         USERNAME: user.username,
-        EMAIL: user.email
+        EMAIL: user.email,
+        STUDENT_NUMBER: user.student_number,
+        NUSNET_ID: user.nusnet_id,
+        TELEGRAM_HANDLE: user.telegram_handle
     }
     return data
 
-def nusnet_id_exists(nusnet_id):
+def get_user_with_nusnet_id(nusnet_id):
     try:
-        existing_user = get_users(nusnet_id=nusnet_id).get()
-        if existing_user:
-            return True
+        return get_users(nusnet_id=nusnet_id).get()
     except User.DoesNotExist:
-        return False
+        return None
 
-def student_number_exists(student_number):
+def get_user_with_student_number(student_number):
     try:
-        existing_user = get_users(student_number=student_number).get()
-        if existing_user:
-            return True
+        return get_users(student_number=student_number).get()
     except User.DoesNotExist:
-        return False
+        return None

@@ -4,6 +4,11 @@ from django.contrib.auth.models import (
 from rest_framework_simplejwt.tokens import RefreshToken
 from common.constants import ACCESS, REFRESH, USERNAME, EMAIL
 
+AUTH_PROVIDERS = {
+    "email": "email",
+    "google": "google"
+}
+
 class UserManager(BaseUserManager):
     def create_user(self, username, email, student_number, telegram_handle, nusnet_id, password=None):
         if username is None:
@@ -46,6 +51,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     student_number = models.CharField(max_length=10, unique=True)
     nusnet_id = models.CharField(max_length=10, unique=True)
     telegram_handle = models.CharField(max_length=50, blank=True)
+    auth_provider = models.CharField(max_length=10, blank=False, default=AUTH_PROVIDERS.get("email"))
 
     USERNAME_FIELD = EMAIL
     REQUIRED_FIELDS = [USERNAME]
