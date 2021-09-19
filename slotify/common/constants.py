@@ -36,6 +36,7 @@ END_DATE_TIME = "end_date_time"
 LOCATION = "location"
 IS_PUBLIC = "is_public"
 GROUP = "group"
+IMAGE_URL = "image_url"
 
 # Tag
 TAG_NAME = "tag_name"
