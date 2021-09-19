@@ -21,6 +21,7 @@ class PostEventSerializer(serializers.ModelSerializer):
     location = serializers.CharField(max_length=EVENT_MAX_LOCATION_LENGTH)
     is_public = serializers.BooleanField()
     slots = serializers.DictField(child=serializers.IntegerField(min_value=1))
+    image_url = serializers.ImageField(required=False, default=None)
 
     def validate(self, data):
         """
@@ -42,6 +43,7 @@ class PostEventSerializer(serializers.ModelSerializer):
             "location",
             "is_public",
             "slots",
+            "image_url",
         ]
 
 
@@ -76,6 +78,7 @@ class EventSerializer(serializers.ModelSerializer):
             "location",
             "is_public",
             "group",
+            "image_url",
         ]
 
 
@@ -90,6 +93,7 @@ class EventUpdateSerializer(serializers.ModelSerializer):
             "end_date_time",
             "location",
             "is_public",
+            "image_url",
         ]
 
 

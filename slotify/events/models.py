@@ -8,7 +8,6 @@ from authentication.models import User
 
 from common.constants import EVENT_MAX_TITLE_LENGTH, EVENT_MAX_LOCATION_LENGTH
 
-# Create your models here.
 
 class Event(models.Model):
     title = models.CharField(max_length=EVENT_MAX_TITLE_LENGTH)
@@ -20,6 +19,9 @@ class Event(models.Model):
     is_public = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    image_url = models.ImageField(
+        upload_to="events", blank=True, null=True, default=None
+    )
 
     class Meta:
         constraints = [
@@ -32,6 +34,7 @@ class Event(models.Model):
 
     def __str__(self):
         return f"{self.group} | {self.title} | {self.start_date_time} - {self.end_date_time}"
+
 
 class Slot(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
@@ -50,9 +53,7 @@ class SignUp(models.Model):
     has_attended = models.BooleanField(default=False)
 
     class Meta:
-        constraints = [
-            UniqueConstraint(fields=['slot', 'user'], name='unique_signup')
-        ]
+        constraints = [UniqueConstraint(fields=["slot", "user"], name="unique_signup")]
         ordering = ["created_at"]
 
     def __str__(self):

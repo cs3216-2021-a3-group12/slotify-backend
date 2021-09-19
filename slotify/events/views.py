@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView
-
+from rest_framework.parsers import FormParser, MultiPartParser
 from .models import Event, Slot, Tag
 from .methods import event_to_json
 from authentication.middleware import check_requester_is_authenticated
@@ -16,17 +16,21 @@ from rest_framework.permissions import (
 from .serializers import PostEventSerializer, EventSerializer, EventUpdateSerializer
 from events.methods import get_signups, signup_to_json, event_to_json
 from common.constants import EVENT, SIGNUP
+import json
 
 
 class GroupEventsView(APIView):
+    parser_classes = [FormParser, MultiPartParser]
+
     @check_requester_is_authenticated
     @check_group_exists
     @check_requester_is_group_admin
     def post(self, request, requester, group):
-        serializer = PostEventSerializer(data=request.data)
 
+        serializer = PostEventSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
+        slots = json.loads(request.data.get("slots"))
 
         # Create but don't save event first
         start_date_time = validated_data.get("start_date_time")
@@ -40,11 +44,10 @@ class GroupEventsView(APIView):
             end_date_time=parse_epoch_timestamp_to_datetime(end_date_time),
             location=validated_data.get("location", ""),
             is_public=validated_data.get("is_public"),
+            image_url=validated_data.get("image_url", ""),
         )
 
         new_event.save()
-
-        slots = validated_data.get("slots")
         for tag_name, limit in slots.items():
             # TODO: might need to handle case where tag name is invalid (doesn't exist)
             # Alternatively, we can assume this case will not happen if frontend strictly
