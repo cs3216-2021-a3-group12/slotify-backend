@@ -5,13 +5,21 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from common.constants import ACCESS, REFRESH, USERNAME, EMAIL
 
 class UserManager(BaseUserManager):
-    def create_user(self, username, email, password=None):
+    def create_user(self, username, email, student_number, telegram_handle, nusnet_id, password=None):
         if username is None:
             raise TypeError('Users should have a name')
         if email is None:
             raise TypeError('Users should have an email')
+        if password is None:
+            raise TypeError('Users should have a password')
 
-        user = self.model(username=username, email=self.normalize_email(email))
+        user = self.model(
+            username=username,
+            email=self.normalize_email(email),
+            student_number=student_number.upper(),
+            nusnet_id=nusnet_id.lower(),
+            telegram_handle=telegram_handle,
+        )
         user.set_password(password)
         user.save()
         return user
@@ -35,6 +43,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    student_number = models.CharField(max_length=10, unique=True)
+    nusnet_id = models.CharField(max_length=10, unique=True)
+    telegram_handle = models.CharField(max_length=50, blank=True)
 
     USERNAME_FIELD = EMAIL
     REQUIRED_FIELDS = [USERNAME]

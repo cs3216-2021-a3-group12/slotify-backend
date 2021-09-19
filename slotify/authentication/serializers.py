@@ -1,21 +1,30 @@
 from django.contrib import auth
 from rest_framework import serializers
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed, ValidationError
 from .models import User
-from common.constants import MESSAGE, USERNAME, EMAIL, PASSWORD, REFRESH, ACCESS, TOKENS
+from .methods import nusnet_id_exists, student_number_exists
+from common.constants import (
+    MESSAGE, USERNAME, EMAIL, PASSWORD, REFRESH, ACCESS, TOKENS, TELEGRAM_HANDLE, STUDENT_NUMBER, NUSNET_ID
+) 
 
 class RegisterSerializer(serializers.ModelSerializer):
     password=serializers.CharField(max_length=50, min_length=8, write_only=True)
 
     class Meta:
         model = User
-        fields = [USERNAME, EMAIL, PASSWORD]
+        fields = [USERNAME, EMAIL, PASSWORD, STUDENT_NUMBER, NUSNET_ID, TELEGRAM_HANDLE]
 
     def validate(self, attrs):
-        # TODO: handle validation here
-        email = attrs.get(EMAIL, '')
-        username = attrs.get(USERNAME, '')
-        password = attrs.get(PASSWORD, '')
+        # Check if student number and nusnet id already exist
+        nusnet_id = attrs.get(NUSNET_ID).lower()
+        student_number = attrs.get(STUDENT_NUMBER).upper()
+
+        if nusnet_id_exists(nusnet_id):
+            raise ValidationError(detail="User with this NUSNET id already exists.")
+
+        if student_number_exists(student_number):
+            raise ValidationError(detail="User with this student number already exists.")
+
 
         return attrs
 
@@ -42,7 +51,7 @@ class LoginSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = [EMAIL, PASSWORD, USERNAME, 'tokens']
+        fields = [EMAIL, PASSWORD, USERNAME, TOKENS]
 
     def validate(self, attrs):
         email = attrs.get(EMAIL, '')
@@ -61,3 +70,9 @@ class LoginSerializer(serializers.ModelSerializer):
             USERNAME: user.username,
             TOKENS: user.tokens()
         }
+
+
+class UpdateProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [USERNAME, EMAIL, STUDENT_NUMBER, NUSNET_ID, TELEGRAM_HANDLE]

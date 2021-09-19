@@ -10,6 +10,9 @@ TOKENS = "tokens"
 USERNAME = "username"
 EMAIL = "email"
 PASSWORD = "password"
+STUDENT_NUMBER = "student_number"
+NUSNET_ID = "nusnet_id"
+TELEGRAM_HANDLE = "telegram_handle"
 
 # Groups
 GROUP_NAME = "name"

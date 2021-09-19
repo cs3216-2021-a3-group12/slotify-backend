@@ -13,3 +13,19 @@ def user_to_json(user):
         EMAIL: user.email
     }
     return data
+
+def nusnet_id_exists(nusnet_id):
+    try:
+        existing_user = get_users(nusnet_id=nusnet_id).get()
+        if existing_user:
+            return True
+    except User.DoesNotExist:
+        return False
+
+def student_number_exists(student_number):
+    try:
+        existing_user = get_users(student_number=student_number).get()
+        if existing_user:
+            return True
+    except User.DoesNotExist:
+        return False

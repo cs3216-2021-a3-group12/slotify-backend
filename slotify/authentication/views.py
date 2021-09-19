@@ -2,7 +2,8 @@ from django.shortcuts import render
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
 from rest_framework import generics, serializers,status
-from .serializers import RegisterSerializer, LoginSerializer
+from rest_framework.views import APIView
+from .serializers import RegisterSerializer, LoginSerializer, UpdateProfileSerializer
 from rest_framework.response import Response
 from .models import User
 from .util import RegistrationUtil
@@ -12,7 +13,6 @@ import jwt
 
 # Create your views here.
 class RegisterView(generics.GenericAPIView):
-
     serializer_class = RegisterSerializer
 
     def post(self, request):
@@ -60,3 +60,8 @@ class LoginView(generics.GenericAPIView):
         serializer.is_valid(raise_exception = True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class UserProfileView(APIView):
+    serializer_class = UpdateProfileSerializer
+
+    
