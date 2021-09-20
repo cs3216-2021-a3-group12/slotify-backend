@@ -14,6 +14,7 @@ STUDENT_NUMBER = "student_number"
 NUSNET_ID = "nusnet_id"
 TELEGRAM_HANDLE = "telegram_handle"
 USER = "user"
+PROFILE = "profile"
 
 # Groups
 GROUP_NAME = "name"

@@ -4,13 +4,20 @@ from rest_framework import generics, status
 from rest_framework.views import APIView
 from .serializers import RegisterSerializer, LoginSerializer, UserProfileSerializer
 from rest_framework.response import Response
-from .models import User
+from .models import User, Profile
 from .util import RegistrationUtil
 from .middleware import check_requester_is_authenticated
-from .methods import user_to_json, get_user_with_student_number, get_user_with_nusnet_id
-from common.constants import MESSAGE, TOKEN, NUSNET_ID, STUDENT_NUMBER
+from .methods import (
+    check_if_other_user_with_field_exists, user_to_json, get_user_with_student_number, get_user_with_nusnet_id
+)
+from common.constants import MESSAGE, TOKEN, NUSNET_ID, STUDENT_NUMBER, TELEGRAM_HANDLE, PROFILE, USERNAME
 
 import jwt
+
+FIELDS_TO_CHECK =  {
+    NUSNET_ID: get_user_with_nusnet_id,
+    STUDENT_NUMBER: get_user_with_student_number
+}
 
 # Create your views here.
 class RegisterView(generics.GenericAPIView):
@@ -74,25 +81,38 @@ class UserProfileView(APIView):
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
 
-        # check if nusnet id already exists (not for requester)
-        nusnet_id_user = get_user_with_nusnet_id(validated_data[NUSNET_ID])
-        if nusnet_id_user and nusnet_id_user != requester:
+        # check if nusnet id already exists (but does not belong to requester)
+        for field, fetch_user_by_field_function in FIELDS_TO_CHECK.items():
+            if not check_if_other_user_with_field_exists(
+                fetch_user_by_field_function, validated_data[field], requester
+            ):
+                continue
+
             data = {
-                MESSAGE: "Failed to update NUSNET id as it is already registered by another user."
+                MESSAGE: f"Failed to update {field} as it is already registered by another user."
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        # check if student number aleady exists (not for requester)
-        student_number_user = get_user_with_student_number(validated_data[STUDENT_NUMBER])
-        if student_number_user  and student_number_user != requester:
-            data = {
-                MESSAGE: "Failed to update student number as it is already registered by another user."
-            }
-            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        # check if requester has profile already
+        if not hasattr(requester, PROFILE):            
+            profile = Profile(
+                user=requester,
+                student_number=validated_data[STUDENT_NUMBER],
+                telegram_handle=validated_data[TELEGRAM_HANDLE],
+                nusnet_id=validated_data[NUSNET_ID]
+            )
+            profile.save()
+            data = user_to_json(requester)
 
+            return Response(data, status=status.HTTP_200_OK)
         try: 
-            requester.__dict__.update(validated_data)
+            requester.username = validated_data[USERNAME]
             requester.save()
+
+            # validated_data.pop(USERNAME, None)
+
+            requester.profile.__dict__.update(validated_data)
+            requester.profile.save()
         except:
             data = {
                 MESSAGE: "An error occurred, please try again later"
