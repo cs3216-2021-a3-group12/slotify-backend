@@ -1,7 +1,9 @@
-from rest_framework.exceptions import AuthenticationFailed, PermissionDenied
+from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.response import Response
 
 from authentication.models import User
 from authentication.methods import get_users
+from common.constants import MESSAGE
 
 def check_requester_is_authenticated(view_method):
     def _arguments_wrapper(instance, request, *args, **kwargs):
@@ -26,9 +28,9 @@ def check_requester_is_authenticated(view_method):
 def check_requester_has_profile(view_method):
     def _arguments_wrapper(instance, request, requester, *args, **kwargs):
         if not hasattr(requester, "profile"):
-            raise PermissionDenied(
-                detail="User does not have profile. Please fill in your profile first!",
-                code="no_profile"
+            return Response(
+                {MESSAGE: "User profile information required. Please fill in before proceeding."},
+                status=452
             )
 
         return view_method(instance, request, requester=requester, *args, **kwargs)
