@@ -1,16 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import (
-    AbstractBaseUser, BaseUserManager, PermissionsMixin)
+    AbstractBaseUser, BaseUserManager, PermissionsMixin
+)
 from rest_framework_simplejwt.tokens import RefreshToken
 from common.constants import ACCESS, REFRESH, USERNAME, EMAIL
 
-AUTH_PROVIDERS = {
-    "email": "email",
-    "google": "google"
-}
-
 class UserManager(BaseUserManager):
-    def create_user(self, username, email, student_number, telegram_handle, nusnet_id, password=None):
+    def create_user(self, username, email, password=None):
         if username is None:
             raise TypeError('Users should have a name')
         if email is None:
@@ -20,10 +16,7 @@ class UserManager(BaseUserManager):
 
         user = self.model(
             username=username,
-            email=self.normalize_email(email),
-            student_number=student_number.upper(),
-            nusnet_id=nusnet_id.lower(),
-            telegram_handle=telegram_handle,
+            email=self.normalize_email(email)
         )
         user.set_password(password)
         user.save()
@@ -48,10 +41,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    student_number = models.CharField(max_length=10, unique=True)
-    nusnet_id = models.CharField(max_length=10, unique=True)
-    telegram_handle = models.CharField(max_length=50, blank=True)
-    auth_provider = models.CharField(max_length=10, blank=False, default=AUTH_PROVIDERS.get("email"))
 
     USERNAME_FIELD = EMAIL
     REQUIRED_FIELDS = [USERNAME]
@@ -67,3 +56,9 @@ class User(AbstractBaseUser, PermissionsMixin):
             ACCESS: str(tokens.access_token),
             REFRESH: str(tokens)
         }
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    student_number = models.CharField(max_length=10, unique=True)
+    nusnet_id = models.CharField(max_length=10, unique=True)
+    telegram_handle = models.CharField(max_length=50, blank=True)

@@ -1,30 +1,48 @@
-from .models import User
-from django.db.models import QuerySet
-
+from .models import User, Profile
 from common.constants import USERNAME, EMAIL, TELEGRAM_HANDLE, STUDENT_NUMBER, NUSNET_ID
 
 def get_users(*args, **kwargs):
     return User.objects.filter(*args, **kwargs)
 
+def get_profiles(*args, **kwargs):
+    return Profile.objects.filter(*args, **kwargs)
 
 def user_to_json(user):
-    data = {
+    user_data = {
         USERNAME: user.username,
         EMAIL: user.email,
-        STUDENT_NUMBER: user.student_number,
-        NUSNET_ID: user.nusnet_id,
-        TELEGRAM_HANDLE: user.telegram_handle
     }
-    return data
+
+    profile = user.profile if hasattr(user, 'profile') else None
+    profile_data = profile_to_json(profile)
+    user_data.update(profile_data)
+
+    return user_data
+
+
+def profile_to_json(profile):
+    profile_data = {
+        STUDENT_NUMBER: profile.student_number if profile else "",
+        NUSNET_ID: profile.nusnet_id if profile else "",
+        TELEGRAM_HANDLE: profile.telegram_handle if profile else ""
+    }
+    return profile_data
 
 def get_user_with_nusnet_id(nusnet_id):
     try:
-        return get_users(nusnet_id=nusnet_id).get()
-    except User.DoesNotExist:
+        profile = get_profiles(nusnet_id=nusnet_id).get()
+        return profile.user
+    except Profile.DoesNotExist:
         return None
 
 def get_user_with_student_number(student_number):
     try:
-        return get_users(student_number=student_number).get()
-    except User.DoesNotExist:
+        profile = get_profiles(student_number=student_number).get()
+        return profile.user
+    except Profile.DoesNotExist:
         return None
+
+
+def check_if_other_user_with_field_exists(fetch_user_by_field_function, field_value, user) -> True:
+    fetched_user = fetch_user_by_field_function(field_value)
+    return fetched_user and fetched_user != user

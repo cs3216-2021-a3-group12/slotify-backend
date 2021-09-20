@@ -8,8 +8,11 @@ def check_requester_is_authenticated(view_method):
         requester_id = request.user.id
 
         try:
-            requester = get_users(id=requester_id).get()
-
+            requester = (
+                get_users(id=requester_id)
+                .select_related("profile")
+                .get()
+            )
         except User.DoesNotExist as e:
             raise AuthenticationFailed(
                 detail="Invalid user.",
