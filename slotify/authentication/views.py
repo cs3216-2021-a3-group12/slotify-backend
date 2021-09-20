@@ -1,18 +1,19 @@
-from django.shortcuts import render
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
-from rest_framework import generics, serializers,status
-from .serializers import RegisterSerializer, LoginSerializer
+from rest_framework import generics, status
+from rest_framework.views import APIView
+from .serializers import RegisterSerializer, LoginSerializer, UserProfileSerializer
 from rest_framework.response import Response
 from .models import User
 from .util import RegistrationUtil
-from common.constants import MESSAGE, TOKEN
+from .middleware import check_requester_is_authenticated
+from .methods import user_to_json, get_user_with_student_number, get_user_with_nusnet_id
+from common.constants import MESSAGE, TOKEN, NUSNET_ID, STUDENT_NUMBER
 
 import jwt
 
 # Create your views here.
 class RegisterView(generics.GenericAPIView):
-
     serializer_class = RegisterSerializer
 
     def post(self, request):
@@ -60,3 +61,46 @@ class LoginView(generics.GenericAPIView):
         serializer.is_valid(raise_exception = True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class UserProfileView(APIView):
+    @check_requester_is_authenticated
+    def get(self, request, requester):
+        return Response(user_to_json(requester), status=status.HTTP_200_OK)
+
+    @check_requester_is_authenticated
+    def patch(self, request, requester):
+        serializer = UserProfileSerializer(data=request.data)
+
+        serializer.is_valid(raise_exception=True)
+        validated_data = serializer.validated_data
+
+        # check if nusnet id already exists (not for requester)
+        nusnet_id_user = get_user_with_nusnet_id(validated_data[NUSNET_ID])
+        if nusnet_id_user and nusnet_id_user != requester:
+            data = {
+                MESSAGE: "Failed to update NUSNET id as it is already registered by another user."
+            }
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+        # check if student number aleady exists (not for requester)
+        student_number_user = get_user_with_student_number(validated_data[STUDENT_NUMBER])
+        if student_number_user  and student_number_user != requester:
+            data = {
+                MESSAGE: "Failed to update student number as it is already registered by another user."
+            }
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+        try: 
+            requester.__dict__.update(validated_data)
+            requester.save()
+        except:
+            data = {
+                MESSAGE: "An error occurred, please try again later"
+            }
+            return Response(data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        data = user_to_json(requester)
+
+        return Response(data, status=status.HTTP_200_OK)
+    
+    
