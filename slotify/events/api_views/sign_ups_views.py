@@ -3,7 +3,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from authentication.middleware import check_requester_is_authenticated
+from authentication.middleware import check_requester_is_authenticated, check_requester_has_profile
 from events.methods import get_slots
 from events.middleware import check_event_exists, check_slot_exists, check_signup_exists
 from events.methods import (
@@ -47,6 +47,7 @@ class SingleSlotView(APIView):
 
 class PostDeleteSignUpView(APIView):
     @check_requester_is_authenticated
+    @check_requester_has_profile
     @check_slot_exists
     def post(self, request, requester, slot):
         event = slot.event

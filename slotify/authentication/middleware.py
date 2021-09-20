@@ -22,3 +22,15 @@ def check_requester_is_authenticated(view_method):
         return view_method(instance, request, requester=requester, *args, **kwargs)
 
     return _arguments_wrapper
+
+def check_requester_has_profile(view_method):
+    def _arguments_wrapper(instance, request, requester, *args, **kwargs):
+        if not hasattr(requester, "profile"):
+            raise PermissionDenied(
+                detail="User does not have profile. Please fill in your profile first!",
+                code="no_profile"
+            )
+
+        return view_method(instance, request, requester=requester, *args, **kwargs)
+
+    return _arguments_wrapper
