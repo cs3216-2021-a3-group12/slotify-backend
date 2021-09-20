@@ -33,6 +33,7 @@ class MembershipSerializer(serializers.ModelSerializer):
             "tag",
         )
 
+
 class MembershipUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Membership
@@ -42,6 +43,7 @@ class MembershipUpdateSerializer(serializers.ModelSerializer):
             "tag",
         )
 
+
 class MembershipRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = Membership
@@ -49,6 +51,7 @@ class MembershipRequestSerializer(serializers.ModelSerializer):
             "user",
             "group",
         )
+
 
 class GroupSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
