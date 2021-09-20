@@ -48,6 +48,10 @@ class MembershipRequest(CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = MembershipRequestSerializer
 
+    def create(self, request, *args, **kwargs):
+        request.data["user"] = request.user.pk
+        return super().create(request, *args, **kwargs)
+
 
 class MembershipRetrieveUpdateDestroy(RetrieveUpdateDestroyAPIView):
     lookup_field = "id"
