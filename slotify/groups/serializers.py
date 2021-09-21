@@ -1,13 +1,25 @@
 from rest_framework import serializers
 
-from authentication.models import User
+from authentication.models import User, Profile
 from groups.models import Group, Category, Tag, Membership
 
 
+class UserProfileSerializer(serializers.ModelSerializer):
+    """
+    Serializer for user profile
+    """
+
+    class Meta:
+        model = Profile
+        fields = ("student_number", "nusnet_id", "telegram_handle")
+
+
 class UserSerializer(serializers.ModelSerializer):
+    profile = UserProfileSerializer(read_only=True)
+
     class Meta:
         model = User
-        fields = ("id", "username")
+        fields = ("id", "username", "profile")
 
 
 class CategorySerializer(serializers.ModelSerializer):
