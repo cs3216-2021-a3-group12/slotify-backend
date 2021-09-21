@@ -1,4 +1,3 @@
-from django.urls.conf import include
 from .models import Event, Slot, SignUp
 from groups.methods import get_user_group_membership, group_to_json
 from authentication.methods import user_to_json
@@ -6,6 +5,7 @@ from common.parsers import parse_datetime_to_epoch_time
 
 # Constants
 from common.constants import (
+    EVENT_ID,
     TITLE,
     DESCRIPTION,
     START_DATE_TIME,
@@ -50,6 +50,7 @@ def get_signups(*args, **kwargs):
 
 def event_to_json(event, include_group=True):
     data = {
+        EVENT_ID: event.id,
         TITLE: event.title,
         DESCRIPTION: event.description,
         START_DATE_TIME: parse_datetime_to_epoch_time(event.start_date_time),

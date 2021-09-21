@@ -30,6 +30,7 @@ EVENT_MAX_TITLE_LENGTH = 100
 EVENT_MIN_TITLE_LENGTH = 3
 EVENT_MAX_LOCATION_LENGTH = 500
 
+EVENT_ID = "id"
 TITLE = "title"
 DESCRIPTION = "description"
 START_DATE_TIME = "start_date_time"
@@ -45,7 +46,7 @@ TAG_ID = "tag_id"
 TAG = "tag"
 
 # Default name for tags
-GENERAL_GROUP_TAG_NAME = "GroupMember"
+GENERAL_GROUP_TAG_NAME = "Member"
 PUBLIC_TAG_NAME = "Public"
 
 # Slots
