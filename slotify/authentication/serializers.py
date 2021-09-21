@@ -2,7 +2,7 @@ from django.contrib import auth
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 from .models import User, Profile
-from .methods import get_user_with_nusnet_id, get_user_with_student_number
+from .methods import get_user_by_email, get_user_with_nusnet_id, get_user_with_student_number
 from common.constants import (
     MESSAGE, USERNAME, EMAIL, PASSWORD, REFRESH, ACCESS, TOKENS, TELEGRAM_HANDLE, STUDENT_NUMBER, NUSNET_ID
 ) 
@@ -56,8 +56,14 @@ class LoginSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         email = attrs.get(EMAIL, '')
         password = attrs.get(PASSWORD, '')
-        user = auth.authenticate(email=email, password=password)
 
+        existing_user = get_user_by_email(email)
+        if existing_user and existing_user.auth_provider != EMAIL:
+            raise AuthenticationFailed(
+                detail= f"Please continue your login using {existing_user.auth_provider.capitalize()}"
+            )
+
+        user = auth.authenticate(email=email, password=password)
         if not user:
             raise AuthenticationFailed({MESSAGE:'Invalid credentials, please try again.'})
         if not user.is_active:

@@ -22,7 +22,7 @@ class Event(models.Model):
     image_url = models.ImageField(
         upload_to="events", blank=True, null=True, default=None
     )
-
+    
     class Meta:
         constraints = [
             models.CheckConstraint(

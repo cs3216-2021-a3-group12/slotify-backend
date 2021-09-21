@@ -32,6 +32,7 @@ from common.constants import (
     CONFIRMED_SIGNUPS,
     PENDING_SIGNUPS,
     USER,
+    HAS_ATTENDED
 )
 
 
@@ -68,6 +69,7 @@ def signup_to_json(signup, include_slot=True, include_user=True):
         SIGNUP_ID: signup.id,
         SIGNUP_DATE: parse_datetime_to_epoch_time(signup.created_at),
         IS_CONFIRMED: signup.is_confirmed,
+        HAS_ATTENDED: signup.has_attended,
     }
 
     if include_slot:

@@ -10,7 +10,7 @@ from .middleware import check_requester_is_authenticated
 from .methods import (
     check_if_other_user_with_field_exists, user_to_json, get_user_with_student_number, get_user_with_nusnet_id
 )
-from common.constants import MESSAGE, TOKEN, NUSNET_ID, STUDENT_NUMBER, TELEGRAM_HANDLE, PROFILE, USERNAME
+from common.constants import MESSAGE, TOKEN, NUSNET_ID, STUDENT_NUMBER, TELEGRAM_HANDLE, PROFILE, USERNAME, EMAIL
 
 import jwt
 
@@ -30,7 +30,7 @@ class RegisterView(generics.GenericAPIView):
         serializer.save()
 
         user_data = serializer.data
-        user = User.objects.get(email=user_data['email'])
+        user = User.objects.get(email=user_data[EMAIL])
         
         current_site = get_current_site(request)
         domain = current_site.domain
