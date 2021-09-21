@@ -41,6 +41,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    auth_provider = models.CharField(
+        max_length=20,
+        blank=False,
+        null=False,
+        default=EMAIL
+    )
+
 
     USERNAME_FIELD = EMAIL
     REQUIRED_FIELDS = [USERNAME]

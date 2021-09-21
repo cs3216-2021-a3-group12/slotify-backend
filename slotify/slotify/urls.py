@@ -12,4 +12,5 @@ urlpatterns = [
     path(f"{API_PREFIX}/groups/", include("groups.urls")),
     path(f"{API_PREFIX}/events/", include("events.urls")),
     path(f"{API_PREFIX}/messages/", include("inboxes.urls")),
+    path('social_auth/', include(('social_auth.urls', 'social_auth'), namespace="social_auth")),
 ]

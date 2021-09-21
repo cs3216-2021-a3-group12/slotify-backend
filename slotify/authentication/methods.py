@@ -19,7 +19,6 @@ def user_to_json(user):
 
     return user_data
 
-
 def profile_to_json(profile):
     profile_data = {
         STUDENT_NUMBER: profile.student_number if profile else "",
@@ -42,6 +41,15 @@ def get_user_with_student_number(student_number):
     except Profile.DoesNotExist:
         return None
 
+def get_user_by_email(email):
+    try:
+        return (
+            get_users(email=email)
+            .select_related('profile')
+            .get()
+        )
+    except User.DoesNotExist:
+        return None
 
 def check_if_other_user_with_field_exists(fetch_user_by_field_function, field_value, user) -> True:
     fetched_user = fetch_user_by_field_function(field_value)
