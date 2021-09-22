@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from groups.methods import is_group_admin
-from groups.permissions import GroupAdminPermission
+from groups.permissions import MembershipGroupAdminPermission
 from rest_framework.generics import (
     ListAPIView,
     CreateAPIView,
@@ -25,7 +25,6 @@ def check_is_group_admin(request):
     """
     Checks if the user is a group admin
     """
-    print(request.data)
     if is_group_admin(request.user, request.data["group"]):
         return Response({'is_group_admin': True})
     else:
@@ -69,4 +68,4 @@ class MembershipRetrieveUpdateDestroy(RetrieveUpdateDestroyAPIView):
     lookup_field = "id"
     queryset = Membership.objects.all()
     serializer_class = MembershipUpdateSerializer
-    permission_classes = [IsAuthenticated & GroupAdminPermission]
+    permission_classes = [IsAuthenticated & MembershipGroupAdminPermission]

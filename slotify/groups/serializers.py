@@ -40,6 +40,7 @@ class MembershipSerializer(serializers.ModelSerializer):
     class Meta:
         model = Membership
         fields = (
+            "id",
             "user",
             "group",
             "is_approved",
@@ -66,6 +67,10 @@ class MembershipRequestSerializer(serializers.ModelSerializer):
             "group",
         )
 
+class SimpleGroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = ("id", "name", "banner_url")
 
 class GroupSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
