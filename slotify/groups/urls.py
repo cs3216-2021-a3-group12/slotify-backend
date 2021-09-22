@@ -13,7 +13,7 @@ urlpatterns = [
         groups.api_views.GroupRetrieveUpdateDestroy.as_view(),
         name="groups-detail",
     ),
-    path("my/", groups.api_views.MyGroupList.as_view(), name="my-groups-list"),
+    path("my_groups", groups.api_views.MyGroupList.as_view(), name="my-groups-list"),
     path("tags/", groups.api_views.TagList.as_view(), name="tags-list"),
     path("tags/new", groups.api_views.TagCreate.as_view(), name="tags-create"),
     path(
