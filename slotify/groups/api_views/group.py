@@ -1,8 +1,10 @@
+from groups.methods import is_group_admin
 from rest_framework.generics import (
     ListAPIView,
     CreateAPIView,
     RetrieveUpdateDestroyAPIView,
 )
+from rest_framework.response import Response
 from groups.serializers import GroupSerializer, GroupCreateSerializer
 from groups.models import Group, Membership
 from rest_framework.permissions import (
@@ -49,3 +51,12 @@ class GroupRetrieveUpdateDestroy(RetrieveUpdateDestroyAPIView):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
     permission_classes = [IsAuthenticatedOrReadOnly & GroupAdminPermission]
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        # check if user is group admin
+        is_admin = is_group_admin(request.user, instance)
+        instance.is_admin = is_admin
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
