@@ -25,7 +25,6 @@ def check_is_group_admin(request):
     """
     Checks if the user is a group admin
     """
-    print(request.data)
     if is_group_admin(request.user, request.data["group"]):
         return Response({'is_group_admin': True})
     else:
