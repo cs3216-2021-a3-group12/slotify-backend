@@ -1,3 +1,4 @@
+from groups.serializers import SimpleGroupSerializer
 from common.parsers import (
     parse_datetime_to_epoch_time,
 )
@@ -60,13 +61,13 @@ class SlotSerializer(serializers.ModelSerializer):
 class EventSerializer(serializers.ModelSerializer):
     start_date_time = serializers.SerializerMethodField()
     end_date_time = serializers.SerializerMethodField()
-
     def get_start_date_time(self, obj):
         return parse_datetime_to_epoch_time(obj.start_date_time)
 
     def get_end_date_time(self, obj):
         return parse_datetime_to_epoch_time(obj.end_date_time)
-
+    group = SimpleGroupSerializer(read_only=True)
+    is_admin = serializers.ReadOnlyField()
     class Meta:
         model = Event
         fields = [
@@ -79,6 +80,7 @@ class EventSerializer(serializers.ModelSerializer):
             "is_public",
             "group",
             "image_url",
+            "is_admin"
         ]
 
 

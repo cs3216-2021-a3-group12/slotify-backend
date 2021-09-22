@@ -1,3 +1,4 @@
+from groups.methods import is_group_admin
 from groups.permissions import EventGroupAdminPermission
 from authentication.middleware import check_requester_is_authenticated
 from rest_framework.views import APIView
@@ -105,3 +106,11 @@ class EventRetrieveUpdateDestroy(RetrieveUpdateDestroyAPIView):
                 request.data.get("end_date_time")
             )
         return super().update(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        # check if user is group admin
+        is_admin = is_group_admin(request.user, instance.group)
+        instance.is_admin = is_admin
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
