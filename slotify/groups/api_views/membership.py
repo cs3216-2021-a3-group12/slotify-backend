@@ -47,7 +47,7 @@ class MembershipList(ListAPIView):
     queryset = Membership.objects.all()
     serializer_class = MembershipSerializer
     permission_classes = [IsAuthenticated & GroupListPermission]
-
+    filter_fields = ("user",)
     def get_queryset(self):
         queryset = super().get_queryset()
         group_id = self.kwargs["id"]
