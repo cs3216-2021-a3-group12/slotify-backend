@@ -11,6 +11,7 @@ def api_root(request, format=None):
             "login": reverse("login", request=request, format=format),
             "verify email": reverse("verify-email", request=request, format=format),
             "list of groups": reverse("groups-list", request=request, format=format),
+            "my list of groups": reverse("my-groups-list", request=request, format=format),
             "create new group": reverse(
                 "groups-create", request=request, format=format
             ),

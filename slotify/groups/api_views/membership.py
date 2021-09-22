@@ -1,3 +1,5 @@
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 from groups.methods import is_group_admin
 from groups.permissions import GroupAdminPermission
 from rest_framework.generics import (
@@ -18,6 +20,16 @@ from rest_framework.permissions import (
     IsAuthenticated,
 )
 
+@api_view(['POST'])
+def check_is_group_admin(request):
+    """
+    Checks if the user is a group admin
+    """
+    print(request.data)
+    if is_group_admin(request.user, request.data["group"]):
+        return Response({'is_group_admin': True})
+    else:
+        return Response({'is_group_admin': False})
 
 class MembersList(ListAPIView):
     queryset = User.objects.all()
@@ -35,7 +47,7 @@ class MembershipList(ListAPIView):
     queryset = Membership.objects.all()
     serializer_class = MembershipSerializer
     permission_classes = [IsAuthenticated & GroupListPermission]
-
+    filter_fields = ("user",)
     def get_queryset(self):
         queryset = super().get_queryset()
         group_id = self.kwargs["id"]

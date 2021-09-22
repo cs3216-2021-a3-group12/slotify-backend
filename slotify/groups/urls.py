@@ -1,3 +1,4 @@
+from groups.api_views.membership import check_is_group_admin
 from django.urls import path
 from rest_framework.urlpatterns import format_suffix_patterns
 
@@ -12,6 +13,7 @@ urlpatterns = [
         groups.api_views.GroupRetrieveUpdateDestroy.as_view(),
         name="groups-detail",
     ),
+    path("my_groups", groups.api_views.MyGroupList.as_view(), name="my-groups-list"),
     path("tags/", groups.api_views.TagList.as_view(), name="tags-list"),
     path("tags/new", groups.api_views.TagCreate.as_view(), name="tags-create"),
     path(
@@ -49,6 +51,7 @@ urlpatterns = [
         name="memberships-detail",
     ),
     path("<int:group_id>/events/new", GroupEventsView.as_view(), name="group-events"),
+    path("is_admin/", check_is_group_admin, name="is-admin"),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

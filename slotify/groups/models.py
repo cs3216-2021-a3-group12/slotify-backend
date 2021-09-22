@@ -47,4 +47,8 @@ class Membership(models.Model):
     tag = models.ForeignKey("Tag", blank=True, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
-        return str(f"User: {self.user.username} from Group:{self.group} is_admin: {self.is_admin}")
+        return str(f"User: {self.user.username} from Group:{self.group} is_admin: {self.is_admin} tag: {self.tag}")
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'group'], name='user_group_unique')
+        ]
