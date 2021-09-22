@@ -9,8 +9,9 @@ class GoogleSocialAuthSerializer(serializers.Serializer):
 
     def validate_auth_token(self, auth_token):
         user_data = Google.validate(auth_token)
-        sub = user_data.get('sub', None)
-        if not sub:
+        try:
+            sub = user_data['sub']
+        except:
             raise serializers.ValidationError(
                 'The token is invalid or expired. Please login again.'
             )
@@ -22,8 +23,6 @@ class GoogleSocialAuthSerializer(serializers.Serializer):
         email = user_data['email']
         name = user_data['name']
         provider = 'google'
-
-        print("USER_DATA:", user_data)
 
         return register_social_user(
             provider=provider, user_id=user_id, email=email, name=name)
