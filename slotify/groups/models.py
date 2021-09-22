@@ -48,3 +48,7 @@ class Membership(models.Model):
 
     def __str__(self):
         return str(f"User: {self.user.username} from Group:{self.group} is_admin: {self.is_admin}")
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'group'], name='user_group_unique')
+        ]
