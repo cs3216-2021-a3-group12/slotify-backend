@@ -43,6 +43,8 @@ def group_to_json(group, include_more_details=True):
 
 
 def is_group_admin(user, group):
+    if not user.is_authenticated:
+        return False
     membership = get_user_group_membership(user, group)
     if membership:
         return membership.is_approved & membership.is_admin
