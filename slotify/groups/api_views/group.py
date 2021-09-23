@@ -58,9 +58,10 @@ class GroupRetrieveUpdateDestroy(RetrieveUpdateDestroyAPIView):
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
-        # check if user is group admin
-        is_admin = is_group_admin(request.user, instance)
-        instance.is_admin = is_admin
+        record = Membership.objects.filter(
+                user=request.user, group=instance).first()
+        instance.is_approved = record.is_approved
+        instance.is_admin = record.is_approved
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
