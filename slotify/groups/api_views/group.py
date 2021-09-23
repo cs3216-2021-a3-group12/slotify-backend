@@ -61,7 +61,7 @@ class GroupRetrieveUpdateDestroy(RetrieveUpdateDestroyAPIView):
         record = Membership.objects.filter(
                 user=request.user, group=instance).first()
         instance.is_approved = record.is_approved
-        instance.is_admin = record.is_approved
+        instance.is_admin = record.is_admin
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
