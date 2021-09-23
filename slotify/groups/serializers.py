@@ -19,6 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer(read_only=True)
     is_admin = ReadOnlyField()
     tag = ReadOnlyField()
+
     class Meta:
         model = User
         fields = ("id", "email", "username", "profile", "is_admin", "tag")
@@ -67,28 +68,39 @@ class MembershipRequestSerializer(serializers.ModelSerializer):
             "group",
         )
 
+
 class SimpleGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = ("id", "name", "banner_url")
 
+
 class GroupSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     members = serializers.SerializerMethodField()
     is_admin = serializers.ReadOnlyField()
+    is_approved = serializers.ReadOnlyField()
+
     class Meta:
         model = Group
-        fields = ("id", "name", "description", "banner_url", "category", "members", "is_admin")
+        fields = (
+            "id",
+            "name",
+            "description",
+            "banner_url",
+            "category",
+            "members",
+            "is_admin",
+            "is_approved",
+        )
 
-    # TODO: remove if member info is not needed in the response
     def get_members(self, instance):
         records = Membership.objects.filter(group=instance).values_list(
             "user", flat=True
         )
         users = User.objects.filter(pk__in=records)
         for user in users:
-            record = Membership.objects.filter(
-                user=user, group=instance).first()
+            record = Membership.objects.filter(user=user, group=instance).first()
             user.is_admin = record.is_admin
             user.tag = record.tag.name if record.tag is not None else ""
         return UserSerializer(users, many=True).data
