@@ -49,3 +49,12 @@ def is_group_admin(user, group):
     if membership:
         return membership.is_approved & membership.is_admin
     return False
+
+def user_in_group_status(user, group):
+    membership = get_user_group_membership(user, group)
+    if not membership:
+        return "public"
+    if membership.is_approved:
+        return "joined"
+    else:
+        return "requested"
