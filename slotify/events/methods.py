@@ -57,9 +57,8 @@ def event_to_json(event, include_group=True):
         END_DATE_TIME: parse_datetime_to_epoch_time(event.end_date_time),
         LOCATION: event.location,
         IS_PUBLIC: event.is_public,
+        IMAGE_URL: event.image_url if event.image_url else ""
     }
-    if event.image_url:
-        data[IMAGE_URL] = event.image_url.url
     if include_group:
         data[GROUP] = group_to_json(event.group)
     return data
