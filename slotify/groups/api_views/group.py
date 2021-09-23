@@ -1,4 +1,4 @@
-from groups.methods import is_group_admin
+from groups.methods import user_in_group_status
 from rest_framework.generics import (
     ListAPIView,
     CreateAPIView,
@@ -60,8 +60,8 @@ class GroupRetrieveUpdateDestroy(RetrieveUpdateDestroyAPIView):
         instance = self.get_object()
         record = Membership.objects.filter(
                 user=request.user, group=instance).first()
-        instance.is_approved = record.is_approved
-        instance.is_admin = record.is_approved
+        instance.is_admin = record.is_admin
+        instance.status = user_in_group_status(request.user, instance)
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 

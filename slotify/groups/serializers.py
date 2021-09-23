@@ -88,7 +88,7 @@ class GroupSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     members = serializers.SerializerMethodField()
     is_admin = serializers.ReadOnlyField()
-    is_approved = serializers.ReadOnlyField()
+    status = serializers.ReadOnlyField()
 
     class Meta:
         model = Group
@@ -100,7 +100,7 @@ class GroupSerializer(serializers.ModelSerializer):
             "category",
             "members",
             "is_admin",
-            "is_approved",
+            "status",
         )
 
     def get_members(self, instance):
