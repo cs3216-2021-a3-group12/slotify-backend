@@ -18,11 +18,20 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer(read_only=True)
     is_admin = ReadOnlyField()
+    is_approved = ReadOnlyField()
     tag = ReadOnlyField()
 
     class Meta:
         model = User
-        fields = ("id", "email", "username", "profile", "is_admin", "tag")
+        fields = (
+            "id",
+            "email",
+            "username",
+            "profile",
+            "is_admin",
+            "is_approved",
+            "tag",
+        )
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -102,6 +111,7 @@ class GroupSerializer(serializers.ModelSerializer):
         for user in users:
             record = Membership.objects.filter(user=user, group=instance).first()
             user.is_admin = record.is_admin
+            user.is_approved = record.is_approved
             user.tag = record.tag.name if record.tag is not None else ""
         return UserSerializer(users, many=True).data
 
