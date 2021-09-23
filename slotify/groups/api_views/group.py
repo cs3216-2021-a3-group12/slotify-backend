@@ -6,7 +6,7 @@ from rest_framework.generics import (
 )
 from rest_framework.response import Response
 from groups.serializers import GroupSerializer, GroupCreateSerializer
-from groups.models import Group, Membership
+from groups.models import Group, Membership, Category
 from rest_framework.permissions import (
     IsAuthenticated,
     IsAuthenticatedOrReadOnly,
@@ -20,6 +20,7 @@ class GroupList(ListAPIView):
     filter_fields = ("category",)
     search_fields = ("name", "description")
 
+
 class MyGroupList(ListAPIView):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
@@ -32,8 +33,11 @@ class MyGroupList(ListAPIView):
         for the currently authenticated user.
         """
         user = self.request.user
-        group_ids = Membership.objects.filter(user=user, is_approved=True).values_list("group_id", flat=True)
+        group_ids = Membership.objects.filter(user=user, is_approved=True).values_list(
+            "group_id", flat=True
+        )
         return Group.objects.filter(id__in=group_ids)
+
 
 class GroupCreate(CreateAPIView):
     serializer_class = GroupCreateSerializer
@@ -60,3 +64,20 @@ class GroupRetrieveUpdateDestroy(RetrieveUpdateDestroyAPIView):
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
+    def update(self, request, *args, **kwargs):
+        if request.data.get("category") is not None:
+            instance = self.get_object()
+            category_id = request.data.get("category")
+            category = Category.objects.get(id=category_id)
+            instance.category = category
+        partial = kwargs.pop("partial", False)
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, "_prefetched_objects_cache", None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
