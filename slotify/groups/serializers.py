@@ -40,6 +40,7 @@ class MembershipSerializer(serializers.ModelSerializer):
     class Meta:
         model = Membership
         fields = (
+            "id",
             "user",
             "group",
             "is_approved",
@@ -66,6 +67,10 @@ class MembershipRequestSerializer(serializers.ModelSerializer):
             "group",
         )
 
+class SimpleGroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = ("id", "name", "banner_url")
 
 class GroupSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
@@ -85,7 +90,7 @@ class GroupSerializer(serializers.ModelSerializer):
             record = Membership.objects.filter(
                 user=user, group=instance).first()
             user.is_admin = record.is_admin
-            user.tag = record.tag if record.tag is not None else ""
+            user.tag = record.tag.name if record.tag is not None else ""
         return UserSerializer(users, many=True).data
 
 
