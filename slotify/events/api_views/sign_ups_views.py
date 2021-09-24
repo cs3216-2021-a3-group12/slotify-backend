@@ -15,6 +15,7 @@ from groups.methods import get_user_group_membership
 from events.serializers import UpdateSignUpSerializer
 
 from common.constants import MESSAGE, SIGNUP, HAS_ATTENDED
+from util import SignupUtil
 
 class SlotsView(APIView):
     @check_requester_is_authenticated
@@ -102,6 +103,10 @@ class PostDeleteSignUpView(APIView):
             MESSAGE: "Successfully signed up",
             SIGNUP: signup_to_json(new_signup, include_user=False)
         }
+
+        SignupUtil.send_registration_confirmation(
+            user=requester, event=slot.event
+        )
         
         return Response(data, status=status.HTTP_201_CREATED)
 
@@ -131,7 +136,10 @@ class PostDeleteSignUpView(APIView):
             pending_signup.save()
             available -= 1
 
-            # TODO: send email/phone notification to previously waitlisted members
+            # TODO: send email notification to previously waitlisted members
+            SignupUtil.send_waitlist_confirmation_notification(
+                user=pending_signup.user, event=slot.event
+            )
 
         data = {
             MESSAGE: "Sign up for this slot withdrawn."
