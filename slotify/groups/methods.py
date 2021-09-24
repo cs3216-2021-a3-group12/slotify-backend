@@ -31,7 +31,7 @@ def group_to_json(group, include_more_details=True):
     data = {
         GROUP_ID: group.id,
         GROUP_NAME: group.name,
-        BANNER_URL: group.banner_url.url if group.banner_url else "",
+        BANNER_URL: f"https://api.slotify.club{group.banner_url.url}" if group.banner_url else "",
         CATEGORY: {CATEGORY_ID: group.category.id, CATEGORY_NAME: group.category.name},
     }
 
