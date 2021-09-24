@@ -2,7 +2,6 @@ from .models import Event, Slot, SignUp
 from groups.methods import get_user_group_membership, group_to_json
 from authentication.methods import user_to_json
 from common.parsers import parse_datetime_to_epoch_time
-from django.conf import settings
 
 # Constants
 from common.constants import (
