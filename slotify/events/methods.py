@@ -59,7 +59,7 @@ def event_to_json(event, include_group=True):
         IS_PUBLIC: event.is_public,
     }
     if event.image_url:
-        data[IMAGE_URL] = event.image_url.url
+        data[IMAGE_URL] = f"https://api.slotify.club/{event.image_url.url}"
 
     if include_group:
         data[GROUP] = group_to_json(event.group)
