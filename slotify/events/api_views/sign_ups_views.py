@@ -15,7 +15,7 @@ from groups.methods import get_user_group_membership
 from events.serializers import UpdateSignUpSerializer
 
 from common.constants import MESSAGE, SIGNUP, HAS_ATTENDED
-from util import SignupUtil
+from events.util import SignupUtil
 
 class SlotsView(APIView):
     @check_requester_is_authenticated
