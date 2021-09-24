@@ -105,7 +105,7 @@ class PostDeleteSignUpView(APIView):
         }
 
         SignupUtil.send_registration_confirmation(
-            user=requester, event=slot.event
+            user=requester, event=slot.event, signup=new_signup
         )
         
         return Response(data, status=status.HTTP_201_CREATED)
