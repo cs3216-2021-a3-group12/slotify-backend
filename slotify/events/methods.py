@@ -2,6 +2,7 @@ from .models import Event, Slot, SignUp
 from groups.methods import get_user_group_membership, group_to_json
 from authentication.methods import user_to_json
 from common.parsers import parse_datetime_to_epoch_time
+from django.conf import settings
 
 # Constants
 from common.constants import (
@@ -59,7 +60,7 @@ def event_to_json(event, include_group=True):
         IS_PUBLIC: event.is_public,
     }
     if event.image_url:
-        data[IMAGE_URL] = event.image_url.url
+        data[IMAGE_URL] = f"https://api.slotify.club/{event.image_url.url}"
 
     if include_group:
         data[GROUP] = group_to_json(event.group)
